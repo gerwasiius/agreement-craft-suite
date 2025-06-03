@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,29 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Search, X, ArrowUp, ArrowDown, Maximize } from "lucide-react";
-
-interface Template {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: string;
-  sections: TemplateSection[];
-}
-
-interface TemplateSection {
-  id: string;
-  name: string;
-  content: string;
-}
-
-interface Section {
-  id: string;
-  name: string;
-  description: string;
-  content: string;
-  groupName: string;
-}
+import { Plus, Search, X, ArrowUp, ArrowDown, Maximize, Eye, Settings } from "lucide-react";
+import { Template, TemplateSection, Section } from "@/types/template";
+import { DocumentPreview } from "@/components/DocumentPreview";
+import { SectionConditions } from "@/components/SectionConditions";
 
 const availableSections: Section[] = [
   {
@@ -65,7 +45,8 @@ const Templates = () => {
         {
           id: "1",
           name: "Osnovna sekcija ugovora",
-          content: "<p>Ovo je osnovna sekcija koja sadrži <strong>važne informacije</strong> o ugovoru.</p>"
+          content: "<p>Ovo je osnovna sekcija koja sadrži <strong>važne informacije</strong> o ugovoru.</p>",
+          conditions: []
         }
       ]
     }
@@ -81,6 +62,8 @@ const Templates = () => {
     sections: [] as TemplateSection[]
   });
   const [previewSection, setPreviewSection] = useState<TemplateSection | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
+  const [editingSectionConditions, setEditingSectionConditions] = useState<{ sectionIndex: number; section: TemplateSection } | null>(null);
 
   const filteredTemplates = templates.filter(template =>
     template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -133,7 +116,8 @@ const Templates = () => {
     const newSection: TemplateSection = {
       id: section.id,
       name: section.name,
-      content: section.content
+      content: section.content,
+      conditions: []
     };
     setFormData(prev => ({
       ...prev,
@@ -164,6 +148,31 @@ const Templates = () => {
 
   const openPreview = (section: TemplateSection) => {
     setPreviewSection(section);
+  };
+
+  const openDocumentPreview = (template: Template) => {
+    setPreviewTemplate(template);
+  };
+
+  const openSectionConditions = (sectionIndex: number) => {
+    setEditingSectionConditions({
+      sectionIndex,
+      section: formData.sections[sectionIndex]
+    });
+  };
+
+  const updateSectionConditions = (conditions: any[]) => {
+    if (editingSectionConditions) {
+      const newSections = [...formData.sections];
+      newSections[editingSectionConditions.sectionIndex] = {
+        ...newSections[editingSectionConditions.sectionIndex],
+        conditions
+      };
+      setFormData(prev => ({
+        ...prev,
+        sections: newSections
+      }));
+    }
   };
 
   return (
@@ -275,7 +284,14 @@ const Templates = () => {
                             <span className="bg-corporate-yellow-light text-corporate-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium">
                               {index + 1}
                             </span>
-                            <span className="font-medium">{section.name}</span>
+                            <div className="flex-1">
+                              <span className="font-medium">{section.name}</span>
+                              {section.conditions && section.conditions.length > 0 && (
+                                <div className="text-xs text-corporate-gray-medium mt-1">
+                                  {section.conditions.length} uslov(a) definisan(o)
+                                </div>
+                              )}
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <Button 
@@ -295,6 +311,15 @@ const Templates = () => {
                               className="h-7 w-7 p-0 text-corporate-gray-medium"
                             >
                               <ArrowDown size={14} />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => openSectionConditions(index)}
+                              className="h-7 w-7 p-0 text-corporate-gray-medium"
+                              title="Podesi uslove"
+                            >
+                              <Settings size={14} />
                             </Button>
                             <Button 
                               size="sm" 
@@ -332,6 +357,32 @@ const Templates = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Dialog za uslove sekcije */}
+        <Dialog open={!!editingSectionConditions} onOpenChange={() => setEditingSectionConditions(null)}>
+          <DialogContent className="sm:max-w-[600px] bg-white max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-corporate-black">
+                Uslovi vidljivosti: {editingSectionConditions?.section.name}
+              </DialogTitle>
+              <DialogDescription>
+                Definisite uslove pod kojima će ova sekcija biti vidljiva u dokumentu.
+              </DialogDescription>
+            </DialogHeader>
+            {editingSectionConditions && (
+              <SectionConditions
+                conditions={editingSectionConditions.section.conditions || []}
+                onChange={updateSectionConditions}
+              />
+            )}
+            <DialogFooter>
+              <Button onClick={() => setEditingSectionConditions(null)}>
+                Zatvori
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog za pregled sekcije */}
         <Dialog open={!!previewSection} onOpenChange={() => setPreviewSection(null)}>
           <DialogContent className="sm:max-w-[700px] bg-white">
             <DialogHeader>
@@ -348,6 +399,15 @@ const Templates = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Dialog za pregled dokumenta */}
+        {previewTemplate && (
+          <DocumentPreview
+            template={previewTemplate}
+            isOpen={!!previewTemplate}
+            onClose={() => setPreviewTemplate(null)}
+          />
+        )}
       </div>
 
       <div className="flex items-center gap-4">
@@ -379,12 +439,19 @@ const Templates = () => {
                 {template.sections.map((section, index) => (
                   <div
                     key={section.id + index}
-                    className="py-1 px-3 bg-corporate-gray-light text-sm rounded-md flex items-center"
+                    className="py-1 px-3 bg-corporate-gray-light text-sm rounded-md flex items-center justify-between"
                   >
-                    <span className="mr-2 text-xs bg-corporate-yellow text-black rounded-full w-5 h-5 flex items-center justify-center">
-                      {index + 1}
-                    </span>
-                    <span className="truncate">{section.name}</span>
+                    <div className="flex items-center">
+                      <span className="mr-2 text-xs bg-corporate-yellow text-black rounded-full w-5 h-5 flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                      <span className="truncate">{section.name}</span>
+                    </div>
+                    {section.conditions && section.conditions.length > 0 && (
+                      <span className="text-xs text-corporate-gray-medium ml-2">
+                        ({section.conditions.length} uslov)
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -393,12 +460,23 @@ const Templates = () => {
               <span className="text-xs text-corporate-gray-medium">
                 Kreirano: {template.createdAt}
               </span>
-              <Button
-                onClick={() => openDialog(template)}
-                className="corporate-button-secondary"
-              >
-                Izmeni
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => openDocumentPreview(template)}
+                  className="corporate-button-secondary flex items-center gap-1"
+                  size="sm"
+                >
+                  <Eye size={14} />
+                  Pregled
+                </Button>
+                <Button
+                  onClick={() => openDialog(template)}
+                  className="corporate-button-secondary"
+                  size="sm"
+                >
+                  Izmeni
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         ))}

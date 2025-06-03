@@ -43,6 +43,15 @@
     --sidebar-accent-foreground: 0 0% 10%;
     --sidebar-border: 0 0% 91%;
     --sidebar-ring: 51 100% 50%;
+
+    /* Custom colors */
+    --corporate-black: 0 0% 15%;
+    --corporate-gray-light: 0 0% 96%;
+    --corporate-gray-medium: 0 0% 45%;
+    --corporate-yellow: 51 100% 50%;
+    --corporate-yellow-light: 51 100% 90%;
+    --corporate-yellow-dark: 51 100% 40%;
+    --corporate-red-medium: 0 84% 60%;
   }
 }
 
@@ -75,5 +84,37 @@
 
   .corporate-input {
     @apply border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-corporate-yellow focus:border-transparent transition-all duration-200;
+  }
+
+  .text-corporate-black {
+    color: hsl(var(--corporate-black));
+  }
+
+  .text-corporate-gray-light {
+    color: hsl(var(--corporate-gray-light));
+  }
+
+  .text-corporate-gray-medium {
+    color: hsl(var(--corporate-gray-medium));
+  }
+
+  .text-corporate-red-medium {
+    color: hsl(var(--corporate-red-medium));
+  }
+
+  .bg-corporate-gray-light {
+    background-color: hsl(var(--corporate-gray-light));
+  }
+
+  .bg-corporate-yellow {
+    background-color: hsl(var(--corporate-yellow));
+  }
+
+  .bg-corporate-yellow-light {
+    background-color: hsl(var(--corporate-yellow-light));
+  }
+
+  .border-corporate-yellow {
+    border-color: hsl(var(--corporate-yellow));
   }
 }
