@@ -6,7 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Search, Users, Eye, EyeOff } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Group {
   id: string;
@@ -14,41 +18,60 @@ interface Group {
   description: string;
   createdAt: string;
   memberCount: number;
+  status: 'active' | 'deactivated';
 }
 
 const Groups = () => {
+  const navigate = useNavigate();
+  
   const [groups, setGroups] = useState<Group[]>([
     {
       id: "1",
       name: "Ugovori o radu",
       description: "Grupa sekcija za različite tipove ugovora o radu",
       createdAt: "2024-01-15",
-      memberCount: 12
+      memberCount: 12,
+      status: 'active'
     },
     {
       id: "2", 
       name: "Licencni ugovori",
       description: "Sekcije vezane za licencne ugovore i autorska prava",
       createdAt: "2024-02-01",
-      memberCount: 8
+      memberCount: 8,
+      status: 'deactivated'
     }
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
-  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [formData, setFormData] = useState({ 
+    name: "", 
+    description: "", 
+    status: true 
+  });
 
-  const filteredGroups = groups.filter(group =>
-    group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    group.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredGroups = groups.filter(group => {
+    const matchesSearch = group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      group.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || group.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
 
   const handleSubmit = () => {
     if (editingGroup) {
       setGroups(groups.map(g => 
         g.id === editingGroup.id 
-          ? { ...g, name: formData.name, description: formData.description }
+          ? { 
+              ...g, 
+              name: formData.name, 
+              description: formData.description,
+              status: formData.status ? 'active' : 'deactivated'
+            }
           : g
       ));
     } else {
@@ -57,24 +80,49 @@ const Groups = () => {
         name: formData.name,
         description: formData.description,
         createdAt: new Date().toISOString().split('T')[0],
-        memberCount: 0
+        memberCount: 0,
+        status: formData.status ? 'active' : 'deactivated'
       };
       setGroups([...groups, newGroup]);
     }
     setIsDialogOpen(false);
     setEditingGroup(null);
-    setFormData({ name: "", description: "" });
+    setFormData({ name: "", description: "", status: true });
   };
 
   const openDialog = (group?: Group) => {
     if (group) {
       setEditingGroup(group);
-      setFormData({ name: group.name, description: group.description });
+      setFormData({ 
+        name: group.name, 
+        description: group.description,
+        status: group.status === 'active'
+      });
     } else {
       setEditingGroup(null);
-      setFormData({ name: "", description: "" });
+      setFormData({ name: "", description: "", status: true });
     }
     setIsDialogOpen(true);
+  };
+
+  const handleViewMembers = (groupId: string, groupName: string) => {
+    navigate(`/sections?groupId=${groupId}&groupName=${encodeURIComponent(groupName)}`);
+  };
+
+  const getStatusBadge = (status: 'active' | 'deactivated') => {
+    return (
+      <Badge 
+        variant={status === 'active' ? 'default' : 'secondary'} 
+        className={`flex items-center gap-1 ${
+          status === 'active' 
+            ? 'bg-green-100 text-green-800 border-green-300' 
+            : 'bg-gray-100 text-gray-600 border-gray-300'
+        }`}
+      >
+        {status === 'active' ? <Eye size={12} /> : <EyeOff size={12} />}
+        {status === 'active' ? 'Aktivna' : 'Deaktivirana'}
+      </Badge>
+    );
   };
 
   return (
@@ -129,6 +177,21 @@ const Groups = () => {
                   className="corporate-input min-h-[80px]"
                 />
               </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="status" className="text-sm font-medium">
+                  Status grupe
+                </Label>
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm ${formData.status ? 'text-green-600' : 'text-gray-500'}`}>
+                    {formData.status ? 'Aktivna' : 'Deaktivirana'}
+                  </span>
+                  <Switch
+                    id="status"
+                    checked={formData.status}
+                    onCheckedChange={(checked) => setFormData({ ...formData, status: checked })}
+                  />
+                </div>
+              </div>
             </div>
             <DialogFooter>
               <Button 
@@ -153,31 +216,55 @@ const Groups = () => {
             className="corporate-input pl-10"
           />
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-48 corporate-input">
+            <SelectValue placeholder="Filter po statusu" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border border-gray-200 shadow-lg">
+            <SelectItem value="all">Sve grupe</SelectItem>
+            <SelectItem value="active">Aktivne</SelectItem>
+            <SelectItem value="deactivated">Deaktivirane</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredGroups.map((group) => (
           <Card key={group.id} className="corporate-card hover:border-corporate-yellow transition-colors duration-200">
             <CardHeader>
-              <CardTitle className="text-corporate-black">{group.name}</CardTitle>
+              <div className="flex justify-between items-start mb-2">
+                <CardTitle className="text-corporate-black">{group.name}</CardTitle>
+                {getStatusBadge(group.status)}
+              </div>
               <CardDescription className="text-corporate-gray-medium">
                 {group.description}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-between items-center">
+              <div className="space-y-3">
                 <div className="text-sm text-corporate-gray-medium">
                   <p>{group.memberCount} članova</p>
                   <p>Kreirana: {group.createdAt}</p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => openDialog(group)}
-                  className="corporate-button-secondary"
-                >
-                  Izmeni
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openDialog(group)}
+                    className="corporate-button-secondary flex-1"
+                  >
+                    Izmeni
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewMembers(group.id, group.name)}
+                    className="corporate-button-secondary flex items-center gap-1"
+                  >
+                    <Users size={14} />
+                    Članovi
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
