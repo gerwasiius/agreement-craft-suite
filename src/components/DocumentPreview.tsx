@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Template, TemplateSection, SectionCondition } from "@/types/template";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 
 interface DocumentPreviewProps {
   template: Template;
@@ -53,7 +55,23 @@ export function DocumentPreview({ template, isOpen, onClose }: DocumentPreviewPr
     return Array.from(vars);
   };
 
-  const visibleSections = template.sections.filter(isSectionVisible);
+  // Funkcija za formatiranje opisa uslova
+  const formatConditionDescription = (condition: SectionCondition): string => {
+    switch (condition.type) {
+      case 'always_visible':
+        return 'Uvijek vidljiva';
+      case 'always_hidden':
+        return 'Uvijek skrivena';
+      case 'variable_equals':
+        return `${condition.variableName} = "${condition.expectedValue}"`;
+      case 'variable_not_equals':
+        return `${condition.variableName} ≠ "${condition.expectedValue}"`;
+      case 'variable_contains':
+        return `${condition.variableName} sadrži "${condition.expectedValue}"`;
+      default:
+        return condition.description;
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -61,7 +79,7 @@ export function DocumentPreview({ template, isOpen, onClose }: DocumentPreviewPr
         <DialogHeader>
           <DialogTitle className="text-corporate-black">Pregled dokumenta: {template.name}</DialogTitle>
           <DialogDescription>
-            Kompletni prikaz dokumenta sa svim vidljivim sekcijama
+            Kompletni prikaz dokumenta sa svim sekcijama i označenim uslovima
           </DialogDescription>
         </DialogHeader>
         
@@ -96,36 +114,89 @@ export function DocumentPreview({ template, isOpen, onClose }: DocumentPreviewPr
               {template.name}
             </h2>
             
-            {visibleSections.length === 0 ? (
-              <div className="text-center py-8 text-corporate-gray-medium">
-                <p>Nema vidljivih sekcija na osnovu trenutnih uslova.</p>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {visibleSections.map((section, index) => (
+            <div className="space-y-8">
+              {template.sections.map((section, index) => {
+                const isVisible = isSectionVisible(section);
+                const hasConditions = section.conditions && section.conditions.length > 0;
+                
+                return (
                   <div key={section.id + index} className="space-y-3">
-                    <h3 className="text-lg font-semibold text-corporate-black border-l-4 border-corporate-yellow pl-3">
-                      {section.name}
-                    </h3>
+                    <div className="flex items-start justify-between">
+                      <h3 className="text-lg font-semibold text-corporate-black border-l-4 border-corporate-yellow pl-3 flex-1">
+                        {section.name}
+                      </h3>
+                      
+                      <div className="flex items-center gap-2 ml-4">
+                        {/* Indikator vidljivosti */}
+                        <div className="flex items-center gap-1">
+                          {isVisible ? (
+                            <Eye size={16} className="text-green-600" />
+                          ) : (
+                            <EyeOff size={16} className="text-red-600" />
+                          )}
+                          <span className={`text-xs font-medium ${isVisible ? 'text-green-600' : 'text-red-600'}`}>
+                            {isVisible ? 'Vidljiva' : 'Skrivena'}
+                          </span>
+                        </div>
+                        
+                        {/* Oznaka za uslove */}
+                        {hasConditions && (
+                          <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                            <AlertCircle size={12} />
+                            {section.conditions!.length} uslov(a)
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Prikaz uslova ako postoje */}
+                    {hasConditions && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertCircle size={14} className="text-amber-600" />
+                          <span className="text-sm font-medium text-amber-800">Uslovi vidljivosti:</span>
+                        </div>
+                        <div className="space-y-1">
+                          {section.conditions!.map((condition, condIndex) => (
+                            <div key={condition.id} className="text-xs text-amber-700 pl-4">
+                              • {formatConditionDescription(condition)}
+                              {condition.description && condition.description !== formatConditionDescription(condition) && (
+                                <span className="text-amber-600 ml-2">({condition.description})</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Sadržaj sekcije sa kondicionalno obojenim pozadinom */}
                     <div 
-                      className="prose max-w-none text-corporate-black leading-relaxed"
+                      className={`prose max-w-none leading-relaxed p-4 rounded-md border ${
+                        !isVisible 
+                          ? 'bg-red-50 border-red-200 text-red-800 opacity-60' 
+                          : hasConditions 
+                            ? 'bg-amber-50 border-amber-200 text-corporate-black'
+                            : 'bg-white border-gray-200 text-corporate-black'
+                      }`}
                       dangerouslySetInnerHTML={{ __html: section.content }}
                     />
-                    {index < visibleSections.length - 1 && (
+                    
+                    {index < template.sections.length - 1 && (
                       <hr className="border-gray-200 my-6" />
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
           </div>
           
           <div className="text-sm text-corporate-gray-medium bg-corporate-gray-light p-3 rounded-md">
             <p><strong>Statistike:</strong></p>
             <p>Ukupno sekcija: {template.sections.length}</p>
-            <p>Vidljivih sekcija: {visibleSections.length}</p>
-            {template.sections.length !== visibleSections.length && (
-              <p>Skrivenih sekcija: {template.sections.length - visibleSections.length}</p>
+            <p>Vidljivih sekcija: {template.sections.filter(isSectionVisible).length}</p>
+            <p>Sekcija sa uslovima: {template.sections.filter(s => s.conditions && s.conditions.length > 0).length}</p>
+            {template.sections.length !== template.sections.filter(isSectionVisible).length && (
+              <p>Skrivenih sekcija: {template.sections.length - template.sections.filter(isSectionVisible).length}</p>
             )}
           </div>
         </div>
