@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
 import Groups from "./pages/Groups";
 import Sections from "./pages/Sections";
 import Templates from "./pages/Templates";
@@ -20,7 +21,8 @@ const App = () => (
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<Groups />} />
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/groups" element={<Groups />} />
             <Route path="/sections" element={<Sections />} />
             <Route path="/templates" element={<Templates />} />
             <Route path="*" element={<NotFound />} />

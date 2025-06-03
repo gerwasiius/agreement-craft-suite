@@ -14,8 +14,13 @@ import {
 
 const menuItems = [
   {
-    title: "Administracija Grupa",
+    title: "Dashboard",
     url: "/",
+    description: "Početna stranica"
+  },
+  {
+    title: "Administracija Grupa",
+    url: "/groups",
     description: "Upravljanje grupama sekcija"
   },
   {
@@ -49,7 +54,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-corporate-gray-medium font-semibold">
-            Administracija
+            Navigacija
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
