@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Groups from "./pages/Groups";
+import GroupSelection from "./pages/GroupSelection";
 import Sections from "./pages/Sections";
 import Templates from "./pages/Templates";
 import NotFound from "./pages/NotFound";
@@ -23,7 +24,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/groups" element={<Groups />} />
-            <Route path="/sections" element={<Sections />} />
+            <Route path="/group-selection" element={<GroupSelection />} />
+            <Route path="/sections/:groupId" element={<Sections />} />
             <Route path="/templates" element={<Templates />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -31,7 +31,7 @@ const Dashboard = () => {
       title: "Sekcije i Članovi",
       description: "Kreiranje i editovanje sekcija dokumenta",
       icon: "fileText",
-      route: "/sections",
+      route: "/group-selection",
       requiredRole: ["admin", "manager"],
       color: "bg-green-500"
     },

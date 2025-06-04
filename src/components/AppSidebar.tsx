@@ -25,7 +25,7 @@ const menuItems = [
   },
   {
     title: "Sekcije i Članovi",
-    url: "/sections",
+    url: "/group-selection",
     description: "Kreiranje i editovanje sekcija"
   },
   {

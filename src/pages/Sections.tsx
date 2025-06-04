@@ -1,20 +1,18 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WysiwygEditor } from "@/components/WysiwygEditor";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, ArrowLeft } from "lucide-react";
 
 interface Section {
   id: string;
   name: string;
   description: string;
   groupId: string;
-  groupName: string;
   version: string;
   content: string;
   createdAt: string;
@@ -26,6 +24,13 @@ const groups = [
 ];
 
 const Sections = () => {
+  const { groupId } = useParams<{ groupId: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Dobijamo groupName iz state-a koji je prosleđen prilikom navigacije
+  const groupName = location.state?.groupName || "Nepoznata grupa";
+
   const [sections, setSections] = useState<Section[]>([
     {
       id: "1",
@@ -39,28 +44,32 @@ const Sections = () => {
     }
   ]);
 
-  const [selectedGroupId, setSelectedGroupId] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<Section | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    groupId: "",
     version: "",
     content: ""
   });
 
+  // Proverava da li je groupId valjan
+  useEffect(() => {
+    if (!groupId) {
+      navigate("/group-selection");
+    }
+  }, [groupId, navigate]);
+
+  // Filtriramo sekcije samo za trenutnu grupu
   const filteredSections = sections.filter(section => {
-    const matchesGroup = selectedGroupId === "all" || section.groupId === selectedGroupId;
+    const matchesGroup = section.groupId === groupId;
     const matchesSearch = section.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          section.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesGroup && matchesSearch;
   });
 
   const handleSubmit = () => {
-    const selectedGroup = groups.find(g => g.id === formData.groupId);
-    
     if (editingSection) {
       setSections(sections.map(s => 
         s.id === editingSection.id 
@@ -68,8 +77,6 @@ const Sections = () => {
               ...s, 
               name: formData.name, 
               description: formData.description,
-              groupId: formData.groupId,
-              groupName: selectedGroup?.name || "",
               version: formData.version,
               content: formData.content
             }
@@ -80,8 +87,7 @@ const Sections = () => {
         id: Date.now().toString(),
         name: formData.name,
         description: formData.description,
-        groupId: formData.groupId,
-        groupName: selectedGroup?.name || "",
+        groupId: groupId!,
         version: formData.version,
         content: formData.content,
         createdAt: new Date().toISOString().split('T')[0]
@@ -90,7 +96,7 @@ const Sections = () => {
     }
     setIsDialogOpen(false);
     setEditingSection(null);
-    setFormData({ name: "", description: "", groupId: "", version: "", content: "" });
+    setFormData({ name: "", description: "", version: "", content: "" });
   };
 
   const openDialog = (section?: Section) => {
@@ -99,24 +105,34 @@ const Sections = () => {
       setFormData({
         name: section.name,
         description: section.description,
-        groupId: section.groupId,
         version: section.version,
         content: section.content
       });
     } else {
       setEditingSection(null);
-      setFormData({ name: "", description: "", groupId: "", version: "", content: "" });
+      setFormData({ name: "", description: "", version: "", content: "" });
     }
     setIsDialogOpen(true);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-corporate-black">Sekcije i Članovi</h1>
+      <div className="flex items-center gap-4">
+        <Button
+          onClick={() => navigate("/group-selection")}
+          variant="outline"
+          size="sm"
+          className="corporate-button-secondary"
+        >
+          <ArrowLeft size={16} className="mr-2" />
+          Nazad na grupe
+        </Button>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold text-corporate-black">
+            Sekcije i Članovi - {groupName}
+          </h1>
           <p className="text-corporate-gray-medium mt-1">
-            Upravljanje sekcijama dokumenata sa WYSIWYG editorom
+            Upravljanje sekcijama dokumenata za grupu "{groupName}"
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -137,7 +153,7 @@ const Sections = () => {
               <DialogDescription>
                 {editingSection 
                   ? "Izmenite podatke o sekciji dokumenta." 
-                  : "Kreirajte novu sekciju sa WYSIWYG editorom."
+                  : `Kreirajte novu sekciju za grupu "${groupName}".`
                 }
               </DialogDescription>
             </DialogHeader>
@@ -163,21 +179,6 @@ const Sections = () => {
                     className="corporate-input"
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="group">Grupa</Label>
-                <Select value={formData.groupId} onValueChange={(value) => setFormData({ ...formData, groupId: value })}>
-                  <SelectTrigger className="corporate-input">
-                    <SelectValue placeholder="Izaberite grupu..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                    {groups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Opis</Label>
@@ -210,29 +211,14 @@ const Sections = () => {
         </Dialog>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-corporate-gray-medium" size={16} />
-          <Input
-            placeholder="Pretraga sekcija..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="corporate-input pl-10"
-          />
-        </div>
-        <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-          <SelectTrigger className="w-48 corporate-input">
-            <SelectValue placeholder="Filtriraj po grupi..." />
-          </SelectTrigger>
-          <SelectContent className="bg-white border border-gray-200 shadow-lg">
-            <SelectItem value="all">Sve grupe</SelectItem>
-            {groups.map((group) => (
-              <SelectItem key={group.id} value={group.id}>
-                {group.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-corporate-gray-medium" size={16} />
+        <Input
+          placeholder="Pretraga sekcija..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="corporate-input pl-10"
+        />
       </div>
 
       <div className="grid gap-4">
@@ -254,15 +240,10 @@ const Sections = () => {
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                  <span className="px-3 py-1 bg-corporate-yellow-light text-corporate-black text-sm rounded-full">
-                    {section.groupName}
-                  </span>
-                  <div 
-                    className="text-sm text-corporate-gray-medium max-w-md truncate"
-                    dangerouslySetInnerHTML={{ __html: section.content || "Bez sadržaja" }}
-                  />
-                </div>
+                <div 
+                  className="text-sm text-corporate-gray-medium max-w-md truncate"
+                  dangerouslySetInnerHTML={{ __html: section.content || "Bez sadržaja" }}
+                />
                 <Button
                   variant="outline"
                   size="sm"
@@ -283,10 +264,10 @@ const Sections = () => {
             <Search className="text-corporate-gray-medium" size={32} />
           </div>
           <h3 className="text-lg font-medium text-corporate-black mb-2">
-            Nema sekcija
+            Nema sekcija za ovu grupu
           </h3>
           <p className="text-corporate-gray-medium">
-            Kreirajte novu sekciju ili promenite filtere pretrage.
+            Kreirajte novu sekciju za grupu "{groupName}" ili promenite filter pretrage.
           </p>
         </div>
       )}
