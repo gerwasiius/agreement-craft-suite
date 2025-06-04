@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Search, Users, ArrowRight } from "lucide-react";
 
 interface Group {
@@ -91,24 +89,10 @@ const GroupSelection = () => {
           >
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-corporate-yellow rounded-lg flex items-center justify-center">
-                    <Users className="text-corporate-black" size={24} />
-                  </div>
-                  <div>
-                    <CardTitle className="text-corporate-black text-lg">
-                      {group.name}
-                    </CardTitle>
-                    <Badge 
-                      className={`text-xs mt-1 ${
-                        group.status === "active" 
-                          ? "bg-green-100 text-green-800 border-green-300" 
-                          : "bg-gray-100 text-gray-800 border-gray-300"
-                      }`}
-                    >
-                      {group.status === "active" ? "AKTIVNA" : "NEAKTIVNA"}
-                    </Badge>
-                  </div>
+                <div>
+                  <CardTitle className="text-corporate-black text-lg">
+                    {group.name}
+                  </CardTitle>
                 </div>
                 <ArrowRight className="text-corporate-gray-medium" size={20} />
               </div>
