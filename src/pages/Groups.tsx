@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,790 @@ const Groups = () => {
       createdAt: "2024-02-01",
       memberCount: 8,
       status: 'deactivated'
+    },
+    {
+      id: "3",
+      name: "Ugovori o najmu",
+      description: "Sekcije za ugovore o najmu nekretnina",
+      createdAt: "2024-01-20",
+      memberCount: 25,
+      status: 'active'
+    },
+    {
+      id: "4",
+      name: "Ugovori o prodaji",
+      description: "Standardni ugovori za prodaju robe i usluga",
+      createdAt: "2024-02-05",
+      memberCount: 18,
+      status: 'active'
+    },
+    {
+      id: "5",
+      name: "Ugovori o kupovini",
+      description: "Grupa za različite tipove ugovora o kupovini",
+      createdAt: "2024-01-25",
+      memberCount: 15,
+      status: 'deactivated'
+    },
+    {
+      id: "6",
+      name: "Ugovori o partnerstvu",
+      description: "Sekcije za poslovne partnerships i joint venture",
+      createdAt: "2024-02-10",
+      memberCount: 9,
+      status: 'active'
+    },
+    {
+      id: "7",
+      name: "Ugovori o distribuciji",
+      description: "Distribucijski ugovori i trgovinska predstavništva",
+      createdAt: "2024-01-30",
+      memberCount: 22,
+      status: 'active'
+    },
+    {
+      id: "8",
+      name: "Ugovori o konsultantskim uslugama",
+      description: "Profesionalne konsultantske usluge i savjetovanja",
+      createdAt: "2024-02-15",
+      memberCount: 13,
+      status: 'active'
+    },
+    {
+      id: "9",
+      name: "Ugovori o održavanju",
+      description: "Tehnički ugovori o održavanju opreme i sistema",
+      createdAt: "2024-01-18",
+      memberCount: 7,
+      status: 'deactivated'
+    },
+    {
+      id: "10",
+      name: "Ugovori o osiguranju",
+      description: "Osiguravajuće police i uvjeti osiguranja",
+      createdAt: "2024-02-20",
+      memberCount: 31,
+      status: 'active'
+    },
+    {
+      id: "11",
+      name: "Ugovori o transportu",
+      description: "Logistički ugovori i usluge prijevoza",
+      createdAt: "2024-01-22",
+      memberCount: 14,
+      status: 'active'
+    },
+    {
+      id: "12",
+      name: "Ugovori o skladištenju",
+      description: "Usluge skladištenja i upravljanja zalihama",
+      createdAt: "2024-02-25",
+      memberCount: 11,
+      status: 'active'
+    },
+    {
+      id: "13",
+      name: "IT ugovori",
+      description: "Ugovori za razvoj softvera i IT usluge",
+      createdAt: "2024-01-28",
+      memberCount: 28,
+      status: 'active'
+    },
+    {
+      id: "14",
+      name: "Marketing ugovori",
+      description: "Reklamni i marketing ugovori",
+      createdAt: "2024-02-03",
+      memberCount: 19,
+      status: 'deactivated'
+    },
+    {
+      id: "15",
+      name: "Ugovori o financiranju",
+      description: "Krediti, zajmovi i financijski instrumenti",
+      createdAt: "2024-01-12",
+      memberCount: 24,
+      status: 'active'
+    },
+    {
+      id: "16",
+      name: "Franšizni ugovori",
+      description: "Franšize i licenciranje poslovnih modela",
+      createdAt: "2024-02-08",
+      memberCount: 16,
+      status: 'active'
+    },
+    {
+      id: "17",
+      name: "Ugovori o obrazovanju",
+      description: "Edukacijski programi i obuke",
+      createdAt: "2024-01-16",
+      memberCount: 12,
+      status: 'active'
+    },
+    {
+      id: "18",
+      name: "Ugovori o zdravstvu",
+      description: "Medicinski ugovori i zdravstvene usluge",
+      createdAt: "2024-02-12",
+      memberCount: 33,
+      status: 'active'
+    },
+    {
+      id: "19",
+      name: "Građevinski ugovori",
+      description: "Izvođenje radova i građevinska djelatnost",
+      createdAt: "2024-01-24",
+      memberCount: 27,
+      status: 'deactivated'
+    },
+    {
+      id: "20",
+      name: "Ugovori o turizmu",
+      description: "Turistička agencija i ugostiteljstvo",
+      createdAt: "2024-02-18",
+      memberCount: 21,
+      status: 'active'
+    },
+    {
+      id: "21",
+      name: "Sportski ugovori",
+      description: "Ugovori sa sportistima i sportskim organizacijama",
+      createdAt: "2024-01-26",
+      memberCount: 8,
+      status: 'active'
+    },
+    {
+      id: "22",
+      name: "Ugovori o kulturi",
+      description: "Kulturne manifestacije i umjetnička djela",
+      createdAt: "2024-02-22",
+      memberCount: 15,
+      status: 'active'
+    },
+    {
+      id: "23",
+      name: "Ugovori o energetici",
+      description: "Energetski sektor i obnovljivi izvori",
+      createdAt: "2024-01-14",
+      memberCount: 29,
+      status: 'active'
+    },
+    {
+      id: "24",
+      name: "Telekomunikacijski ugovori",
+      description: "Telekom usluge i mrežna infrastruktura",
+      createdAt: "2024-02-14",
+      memberCount: 17,
+      status: 'deactivated'
+    },
+    {
+      id: "25",
+      name: "Ugovori o poljoprivredi",
+      description: "Poljoprivredna proizvodnja i prehrambena industrija",
+      createdAt: "2024-01-31",
+      memberCount: 20,
+      status: 'active'
+    },
+    {
+      id: "26",
+      name: "Ugovori o ribarstvu",
+      description: "Ribolov i akvakultura",
+      createdAt: "2024-02-26",
+      memberCount: 6,
+      status: 'active'
+    },
+    {
+      id: "27",
+      name: "Ugovori o šumarstvu",
+      description: "Upravljanje šumama i drvna industrija",
+      createdAt: "2024-01-19",
+      memberCount: 11,
+      status: 'active'
+    },
+    {
+      id: "28",
+      name: "Ugovori o rudarstvu",
+      description: "Eksploatacija minerala i sirovina",
+      createdAt: "2024-02-16",
+      memberCount: 23,
+      status: 'active'
+    },
+    {
+      id: "29",
+      name: "Ugovori o aviaciji",
+      description: "Vazdušni promet i avionska industrija",
+      createdAt: "2024-01-21",
+      memberCount: 13,
+      status: 'deactivated'
+    },
+    {
+      id: "30",
+      name: "Pomorski ugovori",
+      description: "Brodski promet i pomorska trgovina",
+      createdAt: "2024-02-28",
+      memberCount: 18,
+      status: 'active'
+    },
+    {
+      id: "31",
+      name: "Ugovori o železnici",
+      description: "Železnički transport i infrastruktura",
+      createdAt: "2024-01-17",
+      memberCount: 14,
+      status: 'active'
+    },
+    {
+      id: "32",
+      name: "Ugovori o javnom prevozu",
+      description: "Gradski i međugradski javni prevoz",
+      createdAt: "2024-02-11",
+      memberCount: 22,
+      status: 'active'
+    },
+    {
+      id: "33",
+      name: "Ugovori o bezbjednosti",
+      description: "Obezbijeđenje i zaštita lica i imovine",
+      createdAt: "2024-01-23",
+      memberCount: 16,
+      status: 'active'
+    },
+    {
+      id: "34",
+      name: "Ugovori o čišćenju",
+      description: "Održavanje čistoće i higijene",
+      createdAt: "2024-02-17",
+      memberCount: 9,
+      status: 'deactivated'
+    },
+    {
+      id: "35",
+      name: "Ugovori o ugostiteljstvu",
+      description: "Restorani, hoteli i kafei",
+      createdAt: "2024-01-29",
+      memberCount: 25,
+      status: 'active'
+    },
+    {
+      id: "36",
+      name: "Ugovori o trgovini",
+      description: "Maloprodaja i veleprodaja",
+      createdAt: "2024-02-19",
+      memberCount: 30,
+      status: 'active'
+    },
+    {
+      id: "37",
+      name: "Ugovori o proizvodnji",
+      description: "Industrijska proizvodnja i manufaktura",
+      createdAt: "2024-01-27",
+      memberCount: 26,
+      status: 'active'
+    },
+    {
+      id: "38",
+      name: "Ugovori o laboratorijskim uslugama",
+      description: "Analitički i istraživački laboratoriji",
+      createdAt: "2024-02-21",
+      memberCount: 12,
+      status: 'active'
+    },
+    {
+      id: "39",
+      name: "Veterinarski ugovori",
+      description: "Veterinarske usluge i zaštita životinja",
+      createdAt: "2024-01-13",
+      memberCount: 10,
+      status: 'active'
+    },
+    {
+      id: "40",
+      name: "Ugovori o pet-shop uslugama",
+      description: "Trgovina i njega kućnih ljubimaca",
+      createdAt: "2024-02-23",
+      memberCount: 7,
+      status: 'deactivated'
+    },
+    {
+      id: "41",
+      name: "Ugovori o frizerskim uslugama",
+      description: "Frizerski saloni i kozmetički tretmani",
+      createdAt: "2024-01-15",
+      memberCount: 8,
+      status: 'active'
+    },
+    {
+      id: "42",
+      name: "Ugovori o fitness uslugama",
+      description: "Teretane i sportsko-rekreacijski centri",
+      createdAt: "2024-02-24",
+      memberCount: 19,
+      status: 'active'
+    },
+    {
+      id: "43",
+      name: "Ugovori o spa uslugama",
+      description: "Wellness centri i spa tretmani",
+      createdAt: "2024-01-11",
+      memberCount: 15,
+      status: 'active'
+    },
+    {
+      id: "44",
+      name: "Ugovori o eventima",
+      description: "Organizacija događaja i proslava",
+      createdAt: "2024-02-27",
+      memberCount: 21,
+      status: 'active'
+    },
+    {
+      id: "45",
+      name: "Ugovori o fotografskim uslugama",
+      description: "Profesionalna fotografija i video produkcija",
+      createdAt: "2024-01-25",
+      memberCount: 13,
+      status: 'active'
+    },
+    {
+      id: "46",
+      name: "Ugovori o dizajnu",
+      description: "Grafički dizajn i kreativne usluge",
+      createdAt: "2024-02-13",
+      memberCount: 17,
+      status: 'deactivated'
+    },
+    {
+      id: "47",
+      name: "Ugovori o arhitekturi",
+      description: "Arhitektonsko projektovanje i planiranje",
+      createdAt: "2024-01-18",
+      memberCount: 24,
+      status: 'active'
+    },
+    {
+      id: "48",
+      name: "Ugovori o inženjeringu",
+      description: "Inženjersko projektovanje i nadzor",
+      createdAt: "2024-02-15",
+      memberCount: 28,
+      status: 'active'
+    },
+    {
+      id: "49",
+      name: "Ugovori o geodeziji",
+      description: "Geodetske usluge i kartiranje",
+      createdAt: "2024-01-20",
+      memberCount: 11,
+      status: 'active'
+    },
+    {
+      id: "50",
+      name: "Ugovori o pravnim uslugama",
+      description: "Advokatske kancelarije i pravno savjetovanje",
+      createdAt: "2024-02-29",
+      memberCount: 32,
+      status: 'active'
+    },
+    {
+      id: "51",
+      name: "Ugovori o računovodstvu",
+      description: "Računovodstvene usluge i finansijsko izvještavanje",
+      createdAt: "2024-01-22",
+      memberCount: 20,
+      status: 'active'
+    },
+    {
+      id: "52",
+      name: "Ugovori o auditu",
+      description: "Revizorske usluge i kontrola poslovanja",
+      createdAt: "2024-02-04",
+      memberCount: 16,
+      status: 'active'
+    },
+    {
+      id: "53",
+      name: "Ugovori o poreskim uslugama",
+      description: "Poresko savjetovanje i priprema prijava",
+      createdAt: "2024-01-24",
+      memberCount: 14,
+      status: 'deactivated'
+    },
+    {
+      id: "54",
+      name: "Ugovori o HR uslugama",
+      description: "Upravljanje ljudskim resursima",
+      createdAt: "2024-02-06",
+      memberCount: 23,
+      status: 'active'
+    },
+    {
+      id: "55",
+      name: "Ugovori o regrutaciji",
+      description: "Potraga za talentima i zapošljavanje",
+      createdAt: "2024-01-26",
+      memberCount: 18,
+      status: 'active'
+    },
+    {
+      id: "56",
+      name: "Ugovori o obuka",
+      description: "Korporativne obuke i razvoj vještina",
+      createdAt: "2024-02-07",
+      memberCount: 22,
+      status: 'active'
+    },
+    {
+      id: "57",
+      name: "Ugovori o web dizajnu",
+      description: "Izrada web stranica i aplikacija",
+      createdAt: "2024-01-28",
+      memberCount: 25,
+      status: 'active'
+    },
+    {
+      id: "58",
+      name: "Ugovori o SEO uslugama",
+      description: "Optimizacija za pretraživače",
+      createdAt: "2024-02-09",
+      memberCount: 15,
+      status: 'active'
+    },
+    {
+      id: "59",
+      name: "Ugovori o društvenim mrežama",
+      description: "Upravljanje društvenim mrežama i content marketing",
+      createdAt: "2024-01-30",
+      memberCount: 19,
+      status: 'deactivated'
+    },
+    {
+      id: "60",
+      name: "Ugovori o e-commerce",
+      description: "Online trgovina i e-prodaja",
+      createdAt: "2024-02-10",
+      memberCount: 27,
+      status: 'active'
+    },
+    {
+      id: "61",
+      name: "Ugovori o mobilnim aplikacijama",
+      description: "Razvoj iOS i Android aplikacija",
+      createdAt: "2024-01-12",
+      memberCount: 21,
+      status: 'active'
+    },
+    {
+      id: "62",
+      name: "Ugovori o cloud uslugama",
+      description: "Cloud hosting i infrastruktura",
+      createdAt: "2024-02-11",
+      memberCount: 29,
+      status: 'active'
+    },
+    {
+      id: "63",
+      name: "Ugovori o cyber bezbjednosti",
+      description: "Zaštita od cyber prijetnji",
+      createdAt: "2024-01-14",
+      memberCount: 26,
+      status: 'active'
+    },
+    {
+      id: "64",
+      name: "Ugovori o backup uslugama",
+      description: "Sigurnosno kopiranje podataka",
+      createdAt: "2024-02-12",
+      memberCount: 12,
+      status: 'active'
+    },
+    {
+      id: "65",
+      name: "Ugovori o database management",
+      description: "Upravljanje bazama podataka",
+      createdAt: "2024-01-16",
+      memberCount: 17,
+      status: 'deactivated'
+    },
+    {
+      id: "66",
+      name: "Ugovori o sistemskoj integraciji",
+      description: "Integracija različitih IT sistema",
+      createdAt: "2024-02-14",
+      memberCount: 24,
+      status: 'active'
+    },
+    {
+      id: "67",
+      name: "Ugovori o API razvoju",
+      description: "Razvoj i održavanje API-ja",
+      createdAt: "2024-01-18",
+      memberCount: 20,
+      status: 'active'
+    },
+    {
+      id: "68",
+      name: "Ugovori o DevOps uslugama",
+      description: "Automatizacija i CI/CD pipeline",
+      createdAt: "2024-02-16",
+      memberCount: 23,
+      status: 'active'
+    },
+    {
+      id: "69",
+      name: "Ugovori o QA testiranju",
+      description: "Testiranje softvera i osiguravanje kvaliteta",
+      createdAt: "2024-01-20",
+      memberCount: 16,
+      status: 'active'
+    },
+    {
+      id: "70",
+      name: "Ugovori o UX/UI dizajnu",
+      description: "Korisničko iskustvo i interface dizajn",
+      createdAt: "2024-02-18",
+      memberCount: 22,
+      status: 'active'
+    },
+    {
+      id: "71",
+      name: "Ugovori o business intelligence",
+      description: "Analitika podataka i business insight",
+      createdAt: "2024-01-22",
+      memberCount: 25,
+      status: 'deactivated'
+    },
+    {
+      id: "72",
+      name: "Ugovori o CRM sistemima",
+      description: "Customer relationship management",
+      createdAt: "2024-02-20",
+      memberCount: 28,
+      status: 'active'
+    },
+    {
+      id: "73",
+      name: "Ugovori o ERP sistemima",
+      description: "Enterprise resource planning",
+      createdAt: "2024-01-24",
+      memberCount: 31,
+      status: 'active'
+    },
+    {
+      id: "74",
+      name: "Ugovori o e-learning platformama",
+      description: "Online edukacijske platforme",
+      createdAt: "2024-02-22",
+      memberCount: 18,
+      status: 'active'
+    },
+    {
+      id: "75",
+      name: "Ugovori o video streaming",
+      description: "Streaming servisi i video platforme",
+      createdAt: "2024-01-26",
+      memberCount: 15,
+      status: 'active'
+    },
+    {
+      id: "76",
+      name: "Ugovori o gaming industriji",
+      description: "Razvoj igara i gaming platform",
+      createdAt: "2024-02-24",
+      memberCount: 19,
+      status: 'active'
+    },
+    {
+      id: "77",
+      name: "Ugovori o blockchain tehnologiji",
+      description: "Blockchain razvoj i kriptovalute",
+      createdAt: "2024-01-28",
+      memberCount: 13,
+      status: 'deactivated'
+    },
+    {
+      id: "78",
+      name: "Ugovori o IoT uređajima",
+      description: "Internet of Things i pametni uređaji",
+      createdAt: "2024-02-26",
+      memberCount: 21,
+      status: 'active'
+    },
+    {
+      id: "79",
+      name: "Ugovori o AI tehnologiji",
+      description: "Umjetna inteligencija i machine learning",
+      createdAt: "2024-01-30",
+      memberCount: 27,
+      status: 'active'
+    },
+    {
+      id: "80",
+      name: "Ugovori o robotici",
+      description: "Robotski sistemi i automatizacija",
+      createdAt: "2024-02-28",
+      memberCount: 14,
+      status: 'active'
+    },
+    {
+      id: "81",
+      name: "Ugovori o 3D printingu",
+      description: "Aditivna proizvodnja i prototipiranje",
+      createdAt: "2024-01-11",
+      memberCount: 11,
+      status: 'active'
+    },
+    {
+      id: "82",
+      name: "Ugovori o virtual reality",
+      description: "VR aplikacije i immersive tehnologije",
+      createdAt: "2024-02-01",
+      memberCount: 16,
+      status: 'active'
+    },
+    {
+      id: "83",
+      name: "Ugovori o augmented reality",
+      description: "AR rješenja i mixed reality",
+      createdAt: "2024-01-13",
+      memberCount: 12,
+      status: 'deactivated'
+    },
+    {
+      id: "84",
+      name: "Ugovori o drona tehnologiji",
+      description: "Bespilotne letjelice i aerial servisi",
+      createdAt: "2024-02-03",
+      memberCount: 9,
+      status: 'active'
+    },
+    {
+      id: "85",
+      name: "Ugovori o satelitskim uslugama",
+      description: "Satelitska komunikacija i GPS tehnologije",
+      createdAt: "2024-01-15",
+      memberCount: 20,
+      status: 'active'
+    },
+    {
+      id: "86",
+      name: "Ugovori o meteorološkim uslugama",
+      description: "Vremensko predviđanje i klimatski podaci",
+      createdAt: "2024-02-05",
+      memberCount: 8,
+      status: 'active'
+    },
+    {
+      id: "87",
+      name: "Ugovori o geološkim istraživanjima",
+      description: "Geološka analiza i istraživanja",
+      createdAt: "2024-01-17",
+      memberCount: 15,
+      status: 'active'
+    },
+    {
+      id: "88",
+      name: "Ugovori o oceanografiji",
+      description: "Proučavanje okeana i morskih ekosistema",
+      createdAt: "2024-02-07",
+      memberCount: 7,
+      status: 'deactivated'
+    },
+    {
+      id: "89",
+      name: "Ugovori o astronomiji",
+      description: "Astronomska istraživanja i observatorije",
+      createdAt: "2024-01-19",
+      memberCount: 10,
+      status: 'active'
+    },
+    {
+      id: "90",
+      name: "Ugovori o aerosvemirskoj industriji",
+      description: "Svemirska tehnologija i lansiranje satelita",
+      createdAt: "2024-02-09",
+      memberCount: 18,
+      status: 'active'
+    },
+    {
+      id: "91",
+      name: "Ugovori o nuklearnoj energiji",
+      description: "Nuklearne elektrane i sigurnost",
+      createdAt: "2024-01-21",
+      memberCount: 24,
+      status: 'active'
+    },
+    {
+      id: "92",
+      name: "Ugovori o solarna energiji",
+      description: "Solarni paneli i fotovoltaični sistemi",
+      createdAt: "2024-02-11",
+      memberCount: 26,
+      status: 'active'
+    },
+    {
+      id: "93",
+      name: "Ugovori o vjetroenergetici",
+      description: "Vjetroturbine i eolska energija",
+      createdAt: "2024-01-23",
+      memberCount: 22,
+      status: 'active'
+    },
+    {
+      id: "94",
+      name: "Ugovori o hidroenergetici",
+      description: "Hidroelektrane i vodna snaga",
+      createdAt: "2024-02-13",
+      memberCount: 19,
+      status: 'deactivated'
+    },
+    {
+      id: "95",
+      name: "Ugovori o geotermalnoj energiji",
+      description: "Geotermalni sistemi i toplinska energija",
+      createdAt: "2024-01-25",
+      memberCount: 13,
+      status: 'active'
+    },
+    {
+      id: "96",
+      name: "Ugovori o bioenergetici",
+      description: "Biomasa i biogoriva",
+      createdAt: "2024-02-15",
+      memberCount: 17,
+      status: 'active'
+    },
+    {
+      id: "97",
+      name: "Ugovori o upravljanju otpadom",
+      description: "Recikliranje i ekološko zbrinjavanja",
+      createdAt: "2024-01-27",
+      memberCount: 21,
+      status: 'active'
+    },
+    {
+      id: "98",
+      name: "Ugovori o vodosnabdijevanju",
+      description: "Vodni sistemi i tretman vode",
+      createdAt: "2024-02-17",
+      memberCount: 25,
+      status: 'active'
+    },
+    {
+      id: "99",
+      name: "Ugovori o kanalizaciji",
+      description: "Kanalizacioni sistemi i tretman otpadnih voda",
+      createdAt: "2024-01-29",
+      memberCount: 14,
+      status: 'active'
+    },
+    {
+      id: "100",
+      name: "Ugovori o zaštiti okoliša",
+      description: "Ekološki monitoring i zaštita prirode",
+      createdAt: "2024-02-19",
+      memberCount: 23,
+      status: 'active'
     }
   ]);
 
