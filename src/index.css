@@ -1,120 +1,67 @@
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-
-    --primary: 51 100% 50%;
-    --primary-foreground: 0 0% 0%;
-
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
-
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-
-    --accent: 51 100% 50%;
-    --accent-foreground: 0 0% 0%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 51 100% 50%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 0 0% 9%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 91%;
-    --sidebar-ring: 51 100% 50%;
-
-    /* Custom colors */
-    --corporate-black: 0 0% 15%;
-    --corporate-gray-light: 0 0% 96%;
-    --corporate-gray-medium: 0 0% 45%;
-    --corporate-yellow: 51 100% 50%;
-    --corporate-yellow-light: 51 100% 90%;
-    --corporate-yellow-dark: 51 100% 40%;
-    --corporate-red-medium: 0 84% 60%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground font-sans;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold text-corporate-black;
+    @apply bg-background text-foreground;
+    font-family: "Inter", sans-serif;
   }
 }
 
-@layer components {
-  .corporate-card {
-    @apply bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300;
+@layer utilities {
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
 
-  .corporate-button-primary {
-    @apply bg-corporate-yellow hover:bg-corporate-yellow-dark text-corporate-black font-semibold px-6 py-2 rounded-md transition-all duration-200 shadow-sm hover:shadow-md;
-  }
+/* Corporate theme colors */
+:root {
+  --corporate-black: #1a1a1a;
+  --corporate-gray-light: #f5f5f5;
+  --corporate-gray-medium: #666666;
+  --corporate-gray-dark: #333333;
+  --corporate-yellow: #ffd700;
+  --corporate-blue: #0066cc;
+}
 
-  .corporate-button-secondary {
-    @apply bg-white hover:bg-corporate-gray-light text-corporate-black border border-gray-300 font-semibold px-6 py-2 rounded-md transition-all duration-200;
-  }
+/* Corporate button styles */
+.corporate-button-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium;
+}
 
-  .corporate-input {
-    @apply border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-corporate-yellow focus:border-transparent transition-all duration-200;
-  }
+.corporate-button-secondary {
+  @apply border-gray-300 hover:bg-gray-50 text-gray-700 font-medium;
+}
 
-  .text-corporate-black {
-    color: hsl(var(--corporate-black));
-  }
+/* Corporate input styles */
+.corporate-input {
+  @apply border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
+}
 
-  .text-corporate-gray-light {
-    color: hsl(var(--corporate-gray-light));
-  }
-
-  .text-corporate-gray-medium {
-    color: hsl(var(--corporate-gray-medium));
-  }
-
-  .text-corporate-red-medium {
-    color: hsl(var(--corporate-red-medium));
-  }
-
-  .bg-corporate-gray-light {
-    background-color: hsl(var(--corporate-gray-light));
-  }
-
-  .bg-corporate-yellow {
-    background-color: hsl(var(--corporate-yellow));
-  }
-
-  .bg-corporate-yellow-light {
-    background-color: hsl(var(--corporate-yellow-light));
-  }
-
-  .border-corporate-yellow {
-    border-color: hsl(var(--corporate-yellow));
-  }
+/* Corporate card styles */
+.corporate-card {
+  @apply border-gray-200 bg-white shadow-sm;
 }

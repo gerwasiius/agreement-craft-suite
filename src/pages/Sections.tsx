@@ -7,6 +7,7 @@ import { Section, SectionFormData } from "@/types/section";
 import { SectionsPageHeader } from "@/components/SectionsPageHeader";
 import { SectionCard } from "@/components/SectionCard";
 import { SectionsEmptyState } from "@/components/SectionsEmptyState";
+import { SectionPreviewModal } from "@/components/SectionPreviewModal";
 
 const Sections = () => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -22,19 +23,23 @@ const Sections = () => {
       description: "Osnove informacije o ugovoru",
       groupId: "1",
       version: "1.0",
-      content: "<p>Ovo je osnovna sekcija koja sadrži <strong>važne informacije</strong> o ugovoru.</p>",
-      createdAt: "2024-01-15"
+      content: "<p>Ovo je osnovna sekcija koja sadrži <strong>važne informacije</strong> o ugovoru. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>",
+      createdAt: "2024-01-15",
+      isActive: true
     }
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<Section | null>(null);
+  const [previewSection, setPreviewSection] = useState<Section | null>(null);
   const [formData, setFormData] = useState<SectionFormData>({
     name: "",
     description: "",
     version: "",
-    content: ""
+    content: "",
+    isActive: true
   });
 
   useEffect(() => {
@@ -59,7 +64,8 @@ const Sections = () => {
               name: formData.name, 
               description: formData.description,
               version: formData.version,
-              content: formData.content
+              content: formData.content,
+              isActive: formData.isActive
             }
           : s
       ));
@@ -71,13 +77,14 @@ const Sections = () => {
         groupId: groupId!,
         version: formData.version,
         content: formData.content,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split('T')[0],
+        isActive: formData.isActive
       };
       setSections([...sections, newSection]);
     }
     setIsDialogOpen(false);
     setEditingSection(null);
-    setFormData({ name: "", description: "", version: "", content: "" });
+    setFormData({ name: "", description: "", version: "", content: "", isActive: true });
   };
 
   const openDialog = (section?: Section) => {
@@ -87,13 +94,19 @@ const Sections = () => {
         name: section.name,
         description: section.description,
         version: section.version,
-        content: section.content
+        content: section.content,
+        isActive: section.isActive
       });
     } else {
       setEditingSection(null);
-      setFormData({ name: "", description: "", version: "", content: "" });
+      setFormData({ name: "", description: "", version: "", content: "", isActive: true });
     }
     setIsDialogOpen(true);
+  };
+
+  const openPreview = (section: Section) => {
+    setPreviewSection(section);
+    setIsPreviewOpen(true);
   };
 
   return (
@@ -120,12 +133,13 @@ const Sections = () => {
         />
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredSections.map((section) => (
           <SectionCard
             key={section.id}
             section={section}
             onEdit={openDialog}
+            onPreview={openPreview}
           />
         ))}
       </div>
@@ -133,6 +147,12 @@ const Sections = () => {
       {filteredSections.length === 0 && (
         <SectionsEmptyState groupName={groupName} />
       )}
+
+      <SectionPreviewModal
+        section={previewSection}
+        isOpen={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+      />
     </div>
   );
 };
