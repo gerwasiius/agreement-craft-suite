@@ -7,6 +7,7 @@ export interface Section {
   version: string;
   content: string;
   createdAt: string;
+  isActive: boolean;
 }
 
 export interface SectionFormData {
@@ -14,4 +15,5 @@ export interface SectionFormData {
   description: string;
   version: string;
   content: string;
+  isActive: boolean;
 }

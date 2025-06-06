@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { WysiwygEditor } from "@/components/WysiwygEditor";
 import { Plus } from "lucide-react";
 import { Section, SectionFormData } from "@/types/section";
@@ -78,6 +79,14 @@ export const SectionFormDialog = ({
               placeholder="Kratki opis sekcije..."
               className="corporate-input"
             />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="isActive"
+              checked={formData.isActive}
+              onCheckedChange={(checked) => onFormDataChange({ ...formData, isActive: checked })}
+            />
+            <Label htmlFor="isActive">Aktivna verzija</Label>
           </div>
           <div className="space-y-2">
             <Label>Sadržaj sekcije</Label>
