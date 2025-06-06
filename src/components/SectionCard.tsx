@@ -12,11 +12,11 @@ interface SectionCardProps {
 
 export const SectionCard = ({ section, onEdit, onPreview }: SectionCardProps) => {
   return (
-    <div className="border border-gray-200 bg-white rounded-lg p-4 hover:border-corporate-yellow transition-colors duration-200 h-[120px] flex flex-col">
-      <div className="flex justify-between items-start mb-2">
+    <div className="border border-gray-200 bg-white rounded-lg p-6 hover:border-corporate-yellow transition-colors duration-200">
+      <div className="flex justify-between items-start mb-4">
         <div className="flex-1 min-w-0 pr-4">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-corporate-black text-lg font-semibold line-clamp-1">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="text-corporate-black text-xl font-semibold">
               {section.name}
             </h3>
             <Badge 
@@ -26,7 +26,7 @@ export const SectionCard = ({ section, onEdit, onPreview }: SectionCardProps) =>
               {section.isActive ? "Aktivna" : "Neaktivna"}
             </Badge>
           </div>
-          <p className="text-corporate-gray-medium text-sm line-clamp-1">
+          <p className="text-corporate-gray-medium text-sm mb-3">
             {section.description}
           </p>
         </div>
@@ -36,9 +36,9 @@ export const SectionCard = ({ section, onEdit, onPreview }: SectionCardProps) =>
         </div>
       </div>
       
-      <div className="flex-1 mb-2">
+      <div className="mb-4">
         <div 
-          className="text-sm text-corporate-gray-medium line-clamp-2 overflow-hidden"
+          className="text-sm text-corporate-gray-medium"
           dangerouslySetInnerHTML={{ __html: section.content || "Bez sadržaja" }}
         />
       </div>

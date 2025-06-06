@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -132,7 +133,7 @@ const Sections = () => {
         />
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredSections.map((section) => (
           <SectionCard
             key={section.id}
