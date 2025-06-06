@@ -1,68 +1,46 @@
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Eye, Edit } from "lucide-react";
 import { Section } from "@/types/section";
 
 interface SectionCardProps {
   section: Section;
   onEdit: (section: Section) => void;
-  onPreview: (section: Section) => void;
 }
 
-export const SectionCard = ({ section, onEdit, onPreview }: SectionCardProps) => {
+export const SectionCard = ({ section, onEdit }: SectionCardProps) => {
   return (
-    <div className="border border-gray-200 bg-white rounded-lg p-6 hover:border-corporate-yellow transition-colors duration-200">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1 min-w-0 pr-4">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-corporate-black text-xl font-semibold">
-              {section.name}
-            </h3>
-            <Badge 
-              variant={section.isActive ? "default" : "secondary"}
-              className={`text-xs ${section.isActive ? "bg-green-500" : "bg-gray-400"}`}
-            >
-              {section.isActive ? "Aktivna" : "Neaktivna"}
-            </Badge>
+    <Card className="corporate-card hover:border-corporate-yellow transition-colors duration-200">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-corporate-black">{section.name}</CardTitle>
+            <CardDescription className="text-corporate-gray-medium">
+              {section.description}
+            </CardDescription>
           </div>
-          <p className="text-corporate-gray-medium text-sm mb-3">
-            {section.description}
-          </p>
+          <div className="text-right text-sm text-corporate-gray-medium">
+            <p className="font-medium">v{section.version}</p>
+            <p>{section.createdAt}</p>
+          </div>
         </div>
-        <div className="text-right text-sm text-corporate-gray-medium flex-shrink-0">
-          <p className="font-medium">v{section.version}</p>
-          <p>{section.createdAt}</p>
+      </CardHeader>
+      <CardContent>
+        <div className="flex justify-between items-center">
+          <div 
+            className="text-sm text-corporate-gray-medium max-w-md truncate"
+            dangerouslySetInnerHTML={{ __html: section.content || "Bez sadržaja" }}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onEdit(section)}
+            className="corporate-button-secondary"
+          >
+            Izmeni
+          </Button>
         </div>
-      </div>
-      
-      <div className="mb-4">
-        <div 
-          className="text-sm text-corporate-gray-medium"
-          dangerouslySetInnerHTML={{ __html: section.content || "Bez sadržaja" }}
-        />
-      </div>
-      
-      <div className="flex gap-2 justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPreview(section)}
-          className="corporate-button-secondary flex items-center gap-1"
-        >
-          <Eye size={14} />
-          Pregled
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onEdit(section)}
-          className="corporate-button-secondary flex items-center gap-1"
-        >
-          <Edit size={14} />
-          Izmeni
-        </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
