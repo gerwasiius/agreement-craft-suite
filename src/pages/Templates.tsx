@@ -5,11 +5,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, X, ArrowUp, ArrowDown, Maximize, Eye, Settings } from "lucide-react";
 import { Template, TemplateSection, Section } from "@/types/template";
 import { DocumentPreview } from "@/components/DocumentPreview";
 import { SectionConditions } from "@/components/SectionConditions";
 
+// Mock data za grupe
+const availableGroups = [
+  { id: "1", name: "Ugovori o radu", isActive: true },
+  { id: "2", name: "Licencni ugovori", isActive: true },
+  { id: "3", name: "Ugovori o kupoprodaji", isActive: false },
+  { id: "4", name: "Uslužni ugovori", isActive: true }
+];
+
+// Mock data za sekcije
 const availableSections: Section[] = [
   {
     id: "1",
@@ -19,7 +29,7 @@ const availableSections: Section[] = [
     groupName: "Ugovori o radu"
   },
   {
-    id: "2",
+    id: "2", 
     name: "Prava i obaveze",
     description: "Definisanje prava i obaveza ugovornih strana",
     content: "<p>U ovoj sekciji su definisana sva <strong>prava i obaveze</strong> ugovornih strana.</p>",
@@ -27,10 +37,31 @@ const availableSections: Section[] = [
   },
   {
     id: "3",
+    name: "Uslovi rada",
+    description: "Detalji o uslovima rada",
+    content: "<p>Ova sekcija definiše <strong>uslove rada</strong> i radna vremena.</p>",
+    groupName: "Ugovori o radu"
+  },
+  {
+    id: "4",
     name: "Licenciranje",
     description: "Detalji o licencama i pravima korišćenja",
     content: "<p>Ova sekcija definiše uslove <strong>licenciranja</strong> i detalje o pravima korišćenja.</p>",
     groupName: "Licencni ugovori"
+  },
+  {
+    id: "5",
+    name: "Autorska prava",
+    description: "Definisanje autorskih prava",
+    content: "<p>Sekcija koja pokriva sva <strong>autorska prava</strong> i intelektualnu svojinu.</p>",
+    groupName: "Licencni ugovori"
+  },
+  {
+    id: "6",
+    name: "Pružanje usluga",
+    description: "Opis usluga koje se pružaju",
+    content: "<p>Detaljno objašnjenje <strong>usluga</strong> koje se pružaju klijentu.</p>",
+    groupName: "Uslužni ugovori"
   }
 ];
 
@@ -55,6 +86,7 @@ const Templates = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSectionPickerOpen, setIsSectionPickerOpen] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState<string>("");
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -69,6 +101,14 @@ const Templates = () => {
     template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     template.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const activeGroups = availableGroups.filter(group => group.isActive);
+  const filteredSections = selectedGroupId 
+    ? availableSections.filter(section => {
+        const group = availableGroups.find(g => g.name === section.groupName);
+        return group?.id === selectedGroupId && group.isActive;
+      })
+    : [];
 
   const handleSubmit = () => {
     if (editingTemplate) {
@@ -124,6 +164,12 @@ const Templates = () => {
       sections: [...prev.sections, newSection]
     }));
     setIsSectionPickerOpen(false);
+    setSelectedGroupId("");
+  };
+
+  const openSectionPicker = () => {
+    setSelectedGroupId("");
+    setIsSectionPickerOpen(true);
   };
 
   const removeSection = (sectionId: string) => {
@@ -233,46 +279,17 @@ const Templates = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label>Sekcije dokumenta</Label>
-                  <Dialog open={isSectionPickerOpen} onOpenChange={setIsSectionPickerOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="corporate-button-primary flex items-center gap-2" size="sm">
-                        <Plus size={14} />
-                        Dodaj sekciju
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] bg-white">
-                      <DialogHeader>
-                        <DialogTitle>Dodaj sekciju</DialogTitle>
-                        <DialogDescription>
-                          Izaberite sekciju koju želite da dodate u template.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="my-4 space-y-4">
-                        {availableSections.map((section) => (
-                          <Card key={section.id} className="corporate-card hover:border-corporate-yellow cursor-pointer transition-colors duration-200" onClick={() => addSection(section)}>
-                            <CardContent className="p-4">
-                              <div className="flex justify-between items-center">
-                                <div>
-                                  <h3 className="font-medium text-corporate-black">{section.name}</h3>
-                                  <p className="text-sm text-corporate-gray-medium">{section.description}</p>
-                                </div>
-                                <span className="text-xs bg-corporate-yellow-light text-corporate-black px-2 py-1 rounded-full">
-                                  {section.groupName}
-                                </span>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <Button className="corporate-button-primary flex items-center gap-2" size="sm" onClick={openSectionPicker}>
+                    <Plus size={14} />
+                    Dodaj sekciju
+                  </Button>
                 </div>
                 
                 <div className="border border-gray-200 rounded-md p-1 bg-gray-50 min-h-[200px]">
                   {formData.sections.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-[200px] text-corporate-gray-medium">
                       <p>Nema dodatih sekcija</p>
-                      <Button className="mt-2" variant="outline" size="sm" onClick={() => setIsSectionPickerOpen(true)}>
+                      <Button className="mt-2" variant="outline" size="sm" onClick={openSectionPicker}>
                         Dodaj sekciju
                       </Button>
                     </div>
@@ -354,6 +371,70 @@ const Templates = () => {
                 {editingTemplate ? "Sačuvaj izmene" : "Kreiraj template"}
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog za dodavanje sekcije sa izborom grupe */}
+        <Dialog open={isSectionPickerOpen} onOpenChange={setIsSectionPickerOpen}>
+          <DialogContent className="sm:max-w-[600px] bg-white">
+            <DialogHeader>
+              <DialogTitle>Dodaj sekciju</DialogTitle>
+              <DialogDescription>
+                Prvo izaberite grupu, zatim sekciju koju želite da dodate u template.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="my-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Izaberite grupu</Label>
+                <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Izaberite grupu..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeGroups.map((group) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {group.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedGroupId && (
+                <div className="space-y-2">
+                  <Label>Dostupne sekcije</Label>
+                  {filteredSections.length > 0 ? (
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                      {filteredSections.map((section) => (
+                        <Card key={section.id} className="corporate-card hover:border-corporate-yellow cursor-pointer transition-colors duration-200" onClick={() => addSection(section)}>
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <h3 className="font-medium text-corporate-black">{section.name}</h3>
+                                <p className="text-sm text-corporate-gray-medium">{section.description}</p>
+                              </div>
+                              <span className="text-xs bg-corporate-yellow-light text-corporate-black px-2 py-1 rounded-full">
+                                {section.groupName}
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-corporate-gray-medium">
+                      <p>Nema dostupnih sekcija za izabranu grupu</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {!selectedGroupId && (
+                <div className="text-center py-8 text-corporate-gray-medium">
+                  <p>Molimo izaberite grupu da biste videli dostupne sekcije</p>
+                </div>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
 
