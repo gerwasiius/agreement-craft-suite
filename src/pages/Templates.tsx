@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Search, X, ArrowUp, ArrowDown, Maximize, Eye, Settings } from "lucide-react";
 import { Template, TemplateSection, Section } from "@/types/template";
 import { DocumentPreview } from "@/components/DocumentPreview";
@@ -87,6 +88,7 @@ const Templates = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSectionPickerOpen, setIsSectionPickerOpen] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
+  const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -152,24 +154,40 @@ const Templates = () => {
     setIsDialogOpen(true);
   };
 
-  const addSection = (section: Section) => {
-    const newSection: TemplateSection = {
+  const addSelectedSections = () => {
+    const sectionsToAdd = filteredSections.filter(section => 
+      selectedSectionIds.includes(section.id)
+    );
+    
+    const newSections = sectionsToAdd.map(section => ({
       id: section.id,
       name: section.name,
       content: section.content,
       conditions: []
-    };
+    }));
+
     setFormData(prev => ({
       ...prev,
-      sections: [...prev.sections, newSection]
+      sections: [...prev.sections, ...newSections]
     }));
+    
     setIsSectionPickerOpen(false);
     setSelectedGroupId("");
+    setSelectedSectionIds([]);
   };
 
   const openSectionPicker = () => {
     setSelectedGroupId("");
+    setSelectedSectionIds([]);
     setIsSectionPickerOpen(true);
+  };
+
+  const toggleSectionSelection = (sectionId: string) => {
+    setSelectedSectionIds(prev => 
+      prev.includes(sectionId)
+        ? prev.filter(id => id !== sectionId)
+        : [...prev, sectionId]
+    );
   };
 
   const removeSection = (sectionId: string) => {
@@ -374,19 +392,22 @@ const Templates = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog za dodavanje sekcije sa izborom grupe */}
+        {/* Dialog za dodavanje sekcije sa checkboxovima */}
         <Dialog open={isSectionPickerOpen} onOpenChange={setIsSectionPickerOpen}>
           <DialogContent className="sm:max-w-[600px] bg-white">
             <DialogHeader>
-              <DialogTitle>Dodaj sekciju</DialogTitle>
+              <DialogTitle>Dodaj sekcije</DialogTitle>
               <DialogDescription>
-                Prvo izaberite grupu, zatim sekciju koju želite da dodate u template.
+                Prvo izaberite grupu, zatim označite sekcije koje želite da dodate u template.
               </DialogDescription>
             </DialogHeader>
             <div className="my-4 space-y-4">
               <div className="space-y-2">
                 <Label>Izaberite grupu</Label>
-                <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                <Select value={selectedGroupId} onValueChange={(value) => {
+                  setSelectedGroupId(value);
+                  setSelectedSectionIds([]);
+                }}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Izaberite grupu..." />
                   </SelectTrigger>
@@ -404,21 +425,25 @@ const Templates = () => {
                 <div className="space-y-2">
                   <Label>Dostupne sekcije</Label>
                   {filteredSections.length > 0 ? (
-                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto">
                       {filteredSections.map((section) => (
-                        <Card key={section.id} className="corporate-card hover:border-corporate-yellow cursor-pointer transition-colors duration-200" onClick={() => addSection(section)}>
-                          <CardContent className="p-4">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <h3 className="font-medium text-corporate-black">{section.name}</h3>
-                                <p className="text-sm text-corporate-gray-medium">{section.description}</p>
-                              </div>
-                              <span className="text-xs bg-corporate-yellow-light text-corporate-black px-2 py-1 rounded-full">
+                        <div key={section.id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50">
+                          <Checkbox
+                            id={section.id}
+                            checked={selectedSectionIds.includes(section.id)}
+                            onCheckedChange={() => toggleSectionSelection(section.id)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <label htmlFor={section.id} className="cursor-pointer">
+                              <h3 className="font-medium text-corporate-black">{section.name}</h3>
+                              <p className="text-sm text-corporate-gray-medium mt-1">{section.description}</p>
+                              <span className="text-xs bg-corporate-yellow-light text-corporate-black px-2 py-1 rounded-full mt-2 inline-block">
                                 {section.groupName}
                               </span>
-                            </div>
-                          </CardContent>
-                        </Card>
+                            </label>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   ) : (
@@ -435,6 +460,23 @@ const Templates = () => {
                 </div>
               )}
             </div>
+            
+            {selectedGroupId && filteredSections.length > 0 && (
+              <DialogFooter>
+                <div className="flex justify-between items-center w-full">
+                  <span className="text-sm text-corporate-gray-medium">
+                    {selectedSectionIds.length} od {filteredSections.length} sekcija odabrano
+                  </span>
+                  <Button 
+                    onClick={addSelectedSections}
+                    disabled={selectedSectionIds.length === 0}
+                    className="corporate-button-primary"
+                  >
+                    Dodaj odabrane sekcije ({selectedSectionIds.length})
+                  </Button>
+                </div>
+              </DialogFooter>
+            )}
           </DialogContent>
         </Dialog>
 
