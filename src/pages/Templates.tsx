@@ -85,6 +85,7 @@ const Templates = () => {
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [sectionSearchTerm, setSectionSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSectionPickerOpen, setIsSectionPickerOpen] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
@@ -108,7 +109,10 @@ const Templates = () => {
   const filteredSections = selectedGroupId 
     ? availableSections.filter(section => {
         const group = availableGroups.find(g => g.name === section.groupName);
-        return group?.id === selectedGroupId && group.isActive;
+        const matchesGroup = group?.id === selectedGroupId && group.isActive;
+        const matchesSearch = section.name.toLowerCase().includes(sectionSearchTerm.toLowerCase()) ||
+                             section.description.toLowerCase().includes(sectionSearchTerm.toLowerCase());
+        return matchesGroup && matchesSearch;
       })
     : [];
 
@@ -393,7 +397,12 @@ const Templates = () => {
         </Dialog>
 
         {/* Dialog za dodavanje sekcije sa checkboxovima */}
-        <Dialog open={isSectionPickerOpen} onOpenChange={setIsSectionPickerOpen}>
+        <Dialog open={isSectionPickerOpen} onOpenChange={(open) => {
+          setIsSectionPickerOpen(open);
+          if (!open) {
+            setSectionSearchTerm("");
+          }
+        }}>
           <DialogContent className="sm:max-w-[600px] bg-white">
             <DialogHeader>
               <DialogTitle>Dodaj sekcije</DialogTitle>
@@ -407,6 +416,7 @@ const Templates = () => {
                 <Select value={selectedGroupId} onValueChange={(value) => {
                   setSelectedGroupId(value);
                   setSelectedSectionIds([]);
+                  setSectionSearchTerm("");
                 }}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Izaberite grupu..." />
@@ -424,6 +434,18 @@ const Templates = () => {
               {selectedGroupId && (
                 <div className="space-y-2">
                   <Label>Dostupne sekcije</Label>
+                  
+                  {/* Search input for sections */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-corporate-gray-medium" size={16} />
+                    <Input
+                      placeholder="Pretraga sekcija..."
+                      value={sectionSearchTerm}
+                      onChange={(e) => setSectionSearchTerm(e.target.value)}
+                      className="corporate-input pl-10"
+                    />
+                  </div>
+
                   {filteredSections.length > 0 ? (
                     <div className="space-y-3 max-h-[300px] overflow-y-auto">
                       {filteredSections.map((section) => (
@@ -445,6 +467,10 @@ const Templates = () => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  ) : selectedGroupId && sectionSearchTerm ? (
+                    <div className="text-center py-8 text-corporate-gray-medium">
+                      <p>Nema sekcija koje odgovaraju pretrazi "{sectionSearchTerm}"</p>
                     </div>
                   ) : (
                     <div className="text-center py-8 text-corporate-gray-medium">
