@@ -112,44 +112,30 @@ export const SectionViewModal = ({ isOpen, onOpenChange, section }: SectionViewM
             </div>
           </div>
 
-          {/* Previous versions sidebar */}
+          {/* Previous versions sidebar - simplified version list */}
           {!selectedVersion && section.previousVersions && section.previousVersions.length > 0 && (
-            <div className="w-80 border-l pl-6">
+            <div className="w-64 border-l pl-4">
               <div className="flex items-center gap-2 mb-4">
                 <History size={16} className="text-corporate-gray-medium" />
                 <h4 className="font-medium text-corporate-black">Prethodne verzije</h4>
               </div>
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              <ul className="space-y-2 max-h-[400px] overflow-y-auto">
                 {section.previousVersions.map((version) => (
-                  <div
+                  <li
                     key={version.id}
-                    className="border border-gray-200 rounded-md p-3 hover:border-corporate-yellow transition-colors"
+                    className="cursor-pointer hover:bg-gray-100 p-2 rounded-md transition-colors"
+                    onClick={() => handleVersionSelect(version)}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <p className="font-medium text-sm text-corporate-black">
-                          v{version.version}
-                        </p>
-                        <p className="text-xs text-corporate-gray-medium">
-                          {version.createdAt}
-                        </p>
-                        <p className="text-xs text-corporate-gray-medium">
-                          {version.createdBy}
-                        </p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleVersionSelect(version)}
-                        className="text-xs h-7"
-                      >
-                        <Eye size={12} className="mr-1" />
-                        Pregled
-                      </Button>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">v{version.version}</span>
+                      <span className="text-xs text-corporate-gray-medium">{version.createdAt}</span>
                     </div>
-                  </div>
+                    <div className="text-xs text-corporate-gray-medium truncate">
+                      {version.createdBy}
+                    </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
         </div>
