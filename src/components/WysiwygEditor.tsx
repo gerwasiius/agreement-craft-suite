@@ -27,6 +27,47 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
     }
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const placeholderValue = e.dataTransfer.getData("text/plain");
+    
+    if (placeholderValue && editorRef.current) {
+      // Get the current selection/cursor position
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        
+        // Create a span element for the placeholder
+        const placeholderSpan = document.createElement('span');
+        placeholderSpan.textContent = placeholderValue;
+        placeholderSpan.className = 'bg-corporate-yellow/20 border border-corporate-yellow/50 px-1 rounded text-corporate-black font-medium';
+        
+        // Insert the placeholder at cursor position
+        range.deleteContents();
+        range.insertNode(placeholderSpan);
+        
+        // Move cursor after the inserted placeholder
+        range.setStartAfter(placeholderSpan);
+        range.setEndAfter(placeholderSpan);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      } else {
+        // If no selection, append at the end
+        const placeholderSpan = document.createElement('span');
+        placeholderSpan.textContent = placeholderValue;
+        placeholderSpan.className = 'bg-corporate-yellow/20 border border-corporate-yellow/50 px-1 rounded text-corporate-black font-medium';
+        editorRef.current.appendChild(placeholderSpan);
+      }
+      
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
   const execCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);
     if (editorRef.current) {
@@ -96,6 +137,8 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
         ref={editorRef}
         contentEditable
         onInput={handleInput}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
         className="p-4 min-h-[300px] max-h-[500px] overflow-y-auto focus:outline-none focus:border-corporate-yellow"
         dangerouslySetInnerHTML={{ __html: content }}
       />
