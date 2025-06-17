@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -25,7 +24,23 @@ const Sections = () => {
       version: "1.0",
       content: "<p>Ovo je osnovna sekcija koja sadrži <strong>važne informacije</strong> o ugovoru.</p>",
       createdAt: "2024-01-15",
-      isActive: true
+      isActive: true,
+      previousVersions: [
+        {
+          id: "1-v1",
+          version: "0.9",
+          content: "<p>Prethodna verzija osnovne sekcije sa osnovnim informacijama.</p>",
+          createdAt: "2024-01-10",
+          createdBy: "Ana Marić"
+        },
+        {
+          id: "1-v2",
+          version: "0.8",
+          content: "<p>Još starija verzija sa manje detaljnim informacijama.</p>",
+          createdAt: "2024-01-05",
+          createdBy: "Marko Petrov"
+        }
+      ]
     },
     {
       id: "2",
@@ -35,7 +50,16 @@ const Sections = () => {
       version: "2.1",
       content: "<p>Uslovi plaćanja se definišu ovde sa <em>preciznim</em> rokovima.</p>",
       createdAt: "2024-01-16",
-      isActive: false
+      isActive: false,
+      previousVersions: [
+        {
+          id: "2-v1",
+          version: "2.0",
+          content: "<p>Prethodna verzija uslova plaćanja.</p>",
+          createdAt: "2024-01-12",
+          createdBy: "Stefan Nikolić"
+        }
+      ]
     }
   ]);
 
