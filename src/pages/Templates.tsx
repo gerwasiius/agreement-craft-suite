@@ -11,6 +11,7 @@ import { Plus, Search, X, ArrowUp, ArrowDown, Maximize, Eye, Settings } from "lu
 import { Template, TemplateSection, Section } from "@/types/template";
 import { DocumentPreview } from "@/components/DocumentPreview";
 import { SectionConditions } from "@/components/SectionConditions";
+import { SectionPicker } from "@/components/SectionPicker";
 
 // Mock data za grupe
 const availableGroups = [
@@ -85,11 +86,8 @@ const Templates = () => {
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sectionSearchTerm, setSectionSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSectionPickerOpen, setIsSectionPickerOpen] = useState(false);
-  const [selectedGroupId, setSelectedGroupId] = useState<string>("");
-  const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -104,17 +102,6 @@ const Templates = () => {
     template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     template.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const activeGroups = availableGroups.filter(group => group.isActive);
-  const filteredSections = selectedGroupId 
-    ? availableSections.filter(section => {
-        const group = availableGroups.find(g => g.name === section.groupName);
-        const matchesGroup = group?.id === selectedGroupId && group.isActive;
-        const matchesSearch = section.name.toLowerCase().includes(sectionSearchTerm.toLowerCase()) ||
-                             section.description.toLowerCase().includes(sectionSearchTerm.toLowerCase());
-        return matchesGroup && matchesSearch;
-      })
-    : [];
 
   const handleSubmit = () => {
     if (editingTemplate) {
@@ -158,40 +145,12 @@ const Templates = () => {
     setIsDialogOpen(true);
   };
 
-  const addSelectedSections = () => {
-    const sectionsToAdd = filteredSections.filter(section => 
-      selectedSectionIds.includes(section.id)
-    );
-    
-    const newSections = sectionsToAdd.map(section => ({
-      id: section.id,
-      name: section.name,
-      content: section.content,
-      conditions: []
-    }));
-
+  const handleSectionsSelected = (selectedSections: TemplateSection[]) => {
     setFormData(prev => ({
       ...prev,
-      sections: [...prev.sections, ...newSections]
+      sections: [...prev.sections, ...selectedSections]
     }));
-    
     setIsSectionPickerOpen(false);
-    setSelectedGroupId("");
-    setSelectedSectionIds([]);
-  };
-
-  const openSectionPicker = () => {
-    setSelectedGroupId("");
-    setSelectedSectionIds([]);
-    setIsSectionPickerOpen(true);
-  };
-
-  const toggleSectionSelection = (sectionId: string) => {
-    setSelectedSectionIds(prev => 
-      prev.includes(sectionId)
-        ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
-    );
   };
 
   const removeSection = (sectionId: string) => {
@@ -301,7 +260,11 @@ const Templates = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label>Sekcije dokumenta</Label>
-                  <Button className="corporate-button-primary flex items-center gap-2" size="sm" onClick={openSectionPicker}>
+                  <Button 
+                    className="corporate-button-primary flex items-center gap-2" 
+                    size="sm" 
+                    onClick={() => setIsSectionPickerOpen(true)}
+                  >
                     <Plus size={14} />
                     Dodaj sekciju
                   </Button>
@@ -311,7 +274,12 @@ const Templates = () => {
                   {formData.sections.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-[200px] text-corporate-gray-medium">
                       <p>Nema dodatih sekcija</p>
-                      <Button className="mt-2" variant="outline" size="sm" onClick={openSectionPicker}>
+                      <Button 
+                        className="mt-2" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setIsSectionPickerOpen(true)}
+                      >
                         Dodaj sekciju
                       </Button>
                     </div>
@@ -396,115 +364,13 @@ const Templates = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog za dodavanje sekcije sa checkboxovima */}
-        <Dialog open={isSectionPickerOpen} onOpenChange={(open) => {
-          setIsSectionPickerOpen(open);
-          if (!open) {
-            setSectionSearchTerm("");
-          }
-        }}>
-          <DialogContent className="sm:max-w-[600px] bg-white">
-            <DialogHeader>
-              <DialogTitle>Dodaj sekcije</DialogTitle>
-              <DialogDescription>
-                Prvo izaberite grupu, zatim označite sekcije koje želite da dodate u template.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="my-4 space-y-4">
-              <div className="space-y-2">
-                <Label>Izaberite grupu</Label>
-                <Select value={selectedGroupId} onValueChange={(value) => {
-                  setSelectedGroupId(value);
-                  setSelectedSectionIds([]);
-                  setSectionSearchTerm("");
-                }}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Izaberite grupu..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activeGroups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {selectedGroupId && (
-                <div className="space-y-2">
-                  <Label>Dostupne sekcije</Label>
-                  
-                  {/* Search input for sections */}
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-corporate-gray-medium" size={16} />
-                    <Input
-                      placeholder="Pretraga sekcija..."
-                      value={sectionSearchTerm}
-                      onChange={(e) => setSectionSearchTerm(e.target.value)}
-                      className="corporate-input pl-10"
-                    />
-                  </div>
-
-                  {filteredSections.length > 0 ? (
-                    <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                      {filteredSections.map((section) => (
-                        <div key={section.id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50">
-                          <Checkbox
-                            id={section.id}
-                            checked={selectedSectionIds.includes(section.id)}
-                            onCheckedChange={() => toggleSectionSelection(section.id)}
-                            className="mt-1"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <label htmlFor={section.id} className="cursor-pointer">
-                              <h3 className="font-medium text-corporate-black">{section.name}</h3>
-                              <p className="text-sm text-corporate-gray-medium mt-1">{section.description}</p>
-                              <span className="text-xs bg-corporate-yellow-light text-corporate-black px-2 py-1 rounded-full mt-2 inline-block">
-                                {section.groupName}
-                              </span>
-                            </label>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : selectedGroupId && sectionSearchTerm ? (
-                    <div className="text-center py-8 text-corporate-gray-medium">
-                      <p>Nema sekcija koje odgovaraju pretrazi "{sectionSearchTerm}"</p>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-corporate-gray-medium">
-                      <p>Nema dostupnih sekcija za izabranu grupu</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {!selectedGroupId && (
-                <div className="text-center py-8 text-corporate-gray-medium">
-                  <p>Molimo izaberite grupu da biste videli dostupne sekcije</p>
-                </div>
-              )}
-            </div>
-            
-            {selectedGroupId && filteredSections.length > 0 && (
-              <DialogFooter>
-                <div className="flex justify-between items-center w-full">
-                  <span className="text-sm text-corporate-gray-medium">
-                    {selectedSectionIds.length} od {filteredSections.length} sekcija odabrano
-                  </span>
-                  <Button 
-                    onClick={addSelectedSections}
-                    disabled={selectedSectionIds.length === 0}
-                    className="corporate-button-primary"
-                  >
-                    Dodaj odabrane sekcije ({selectedSectionIds.length})
-                  </Button>
-                </div>
-              </DialogFooter>
-            )}
-          </DialogContent>
-        </Dialog>
+        {/* New SectionPicker component */}
+        <SectionPicker
+          isOpen={isSectionPickerOpen}
+          onOpenChange={setIsSectionPickerOpen}
+          availableSections={availableSections}
+          onSectionsSelected={handleSectionsSelected}
+        />
 
         {/* Dialog za uslove sekcije */}
         <Dialog open={!!editingSectionConditions} onOpenChange={() => setEditingSectionConditions(null)}>
