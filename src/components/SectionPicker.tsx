@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Search, ArrowLeft, Users } from "lucide-react";
+import { Search, ArrowLeft, Users, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useGroupsApi } from "@/hooks/useGroupsApi";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface SectionPickerProps {
   isOpen: boolean;
@@ -33,20 +41,18 @@ export const SectionPicker = ({
 }: SectionPickerProps) => {
   const [step, setStep] = useState<'groups' | 'sections'>('groups');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [groupSearchTerm, setGroupSearchTerm] = useState("");
+  const [sectionSearchTerm, setSectionSearchTerm] = useState("");
   const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
-  // Get unique groups with section count
-  const availableGroups = useMemo(() => {
-    const groupMap = new Map();
-    availableSections.forEach(section => {
-      if (!groupMap.has(section.groupName)) {
-        groupMap.set(section.groupName, { name: section.groupName, sectionCount: 0 });
-      }
-      groupMap.get(section.groupName).sectionCount++;
-    });
-    return Array.from(groupMap.values()).sort((a, b) => a.name.localeCompare(b.name));
-  }, [availableSections]);
+  // API poziv za grupe sa search i paginacijom
+  const { data: groupsData, isLoading: groupsLoading, error: groupsError } = useGroupsApi({
+    page: currentPage,
+    pageSize,
+    searchTerm: groupSearchTerm
+  });
 
   // Filter sections from selected group
   const sectionsInGroup = useMemo(() => {
@@ -57,24 +63,33 @@ export const SectionPicker = ({
   // Filter sections by search term
   const filteredSections = useMemo(() => {
     return sectionsInGroup.filter(section => 
-      searchTerm === "" || 
-      section.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      section.description.toLowerCase().includes(searchTerm.toLowerCase())
+      sectionSearchTerm === "" || 
+      section.name.toLowerCase().includes(sectionSearchTerm.toLowerCase()) ||
+      section.description.toLowerCase().includes(sectionSearchTerm.toLowerCase())
     );
-  }, [sectionsInGroup, searchTerm]);
+  }, [sectionsInGroup, sectionSearchTerm]);
 
   const handleGroupSelect = (groupName: string) => {
     setSelectedGroup(groupName);
     setStep('sections');
-    setSearchTerm("");
+    setSectionSearchTerm("");
     setSelectedSectionIds([]);
   };
 
   const handleBackToGroups = () => {
     setStep('groups');
     setSelectedGroup(null);
-    setSearchTerm("");
+    setSectionSearchTerm("");
     setSelectedSectionIds([]);
+  };
+
+  const handleGroupSearchChange = (value: string) => {
+    setGroupSearchTerm(value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const toggleSectionSelection = (sectionId: string) => {
@@ -108,8 +123,10 @@ export const SectionPicker = ({
     // Reset state
     setStep('groups');
     setSelectedGroup(null);
-    setSearchTerm("");
+    setGroupSearchTerm("");
+    setSectionSearchTerm("");
     setSelectedSectionIds([]);
+    setCurrentPage(1);
   };
 
   const handleCancel = () => {
@@ -117,8 +134,10 @@ export const SectionPicker = ({
     // Reset state
     setStep('groups');
     setSelectedGroup(null);
-    setSearchTerm("");
+    setGroupSearchTerm("");
+    setSectionSearchTerm("");
     setSelectedSectionIds([]);
+    setCurrentPage(1);
   };
 
   const selectedCount = selectedSectionIds.length;
@@ -150,38 +169,133 @@ export const SectionPicker = ({
 
         <div className="space-y-4 py-4">
           {step === 'groups' ? (
-            /* Groups Selection */
+            /* Groups Selection with Search and Pagination */
             <div className="space-y-3">
+              {/* Search for groups */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-corporate-gray-medium" size={16} />
+                <Input
+                  placeholder="Pretražite grupe..."
+                  value={groupSearchTerm}
+                  onChange={(e) => handleGroupSearchChange(e.target.value)}
+                  className="corporate-input pl-10"
+                />
+              </div>
+
               <div className="border rounded-md">
                 <div className="p-3 border-b bg-gray-50">
                   <span className="text-sm text-corporate-gray-medium flex items-center gap-2">
                     <Users size={16} />
-                    {availableGroups.length} grupa dostupno
+                    {groupsLoading ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 size={14} className="animate-spin" />
+                        Učitavanje grupa...
+                      </span>
+                    ) : groupsError ? (
+                      <span className="text-red-500">{groupsError}</span>
+                    ) : (
+                      `${groupsData?.totalCount || 0} grupa${groupsData?.totalCount === 1 ? '' : 'a'} pronađeno`
+                    )}
                   </span>
                 </div>
-                <div className="max-h-[500px] overflow-y-auto">
-                  <div className="divide-y">
-                    {availableGroups.map((group) => (
-                      <div 
-                        key={group.name}
-                        className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                        onClick={() => handleGroupSelect(group.name)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-medium text-corporate-black">{group.name}</h3>
-                            <p className="text-sm text-corporate-gray-medium">
-                              {group.sectionCount} sekcija
-                            </p>
+
+                <div className="max-h-[400px] overflow-y-auto">
+                  {groupsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 size={32} className="animate-spin text-corporate-gray-medium" />
+                    </div>
+                  ) : groupsError ? (
+                    <div className="text-center py-8 text-red-500">
+                      <p>Greška pri učitavanju grupa</p>
+                    </div>
+                  ) : !groupsData?.groups.length ? (
+                    <div className="text-center py-8 text-corporate-gray-medium">
+                      <p>
+                        {groupSearchTerm 
+                          ? "Nema grupa koje odgovaraju pretrazi" 
+                          : "Nema dostupnih grupa"
+                        }
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="divide-y">
+                      {groupsData.groups.map((group) => (
+                        <div 
+                          key={group.id}
+                          className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                          onClick={() => handleGroupSelect(group.name)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-medium text-corporate-black">{group.name}</h3>
+                              <p className="text-sm text-corporate-gray-medium">
+                                {group.sectionCount} sekcija
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="text-xs">
+                              {group.sectionCount}
+                            </Badge>
                           </div>
-                          <Badge variant="secondary" className="text-xs">
-                            {group.sectionCount}
-                          </Badge>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Pagination */}
+                {groupsData && groupsData.totalPages > 1 && (
+                  <div className="p-3 border-t bg-gray-50">
+                    <Pagination>
+                      <PaginationContent>
+                        {groupsData.hasPreviousPage && (
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              onClick={() => handlePageChange(currentPage - 1)}
+                              className="cursor-pointer"
+                            />
+                          </PaginationItem>
+                        )}
+                        
+                        {/* Page numbers */}
+                        {Array.from({ length: Math.min(5, groupsData.totalPages) }, (_, i) => {
+                          const pageNum = Math.max(1, Math.min(
+                            groupsData.totalPages - 4,
+                            currentPage - 2
+                          )) + i;
+                          
+                          if (pageNum <= groupsData.totalPages) {
+                            return (
+                              <PaginationItem key={pageNum}>
+                                <PaginationLink
+                                  onClick={() => handlePageChange(pageNum)}
+                                  isActive={currentPage === pageNum}
+                                  className="cursor-pointer"
+                                >
+                                  {pageNum}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          }
+                          return null;
+                        })}
+
+                        {groupsData.hasNextPage && (
+                          <PaginationItem>
+                            <PaginationNext 
+                              onClick={() => handlePageChange(currentPage + 1)}
+                              className="cursor-pointer"
+                            />
+                          </PaginationItem>
+                        )}
+                      </PaginationContent>
+                    </Pagination>
+                    
+                    <div className="text-center text-xs text-corporate-gray-medium mt-2">
+                      Stranica {groupsData.currentPage} od {groupsData.totalPages} 
+                      ({groupsData.totalCount} ukupno grupa)
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -191,8 +305,8 @@ export const SectionPicker = ({
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-corporate-gray-medium" size={16} />
                 <Input
                   placeholder="Pretražite sekcije..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={sectionSearchTerm}
+                  onChange={(e) => setSectionSearchTerm(e.target.value)}
                   className="corporate-input pl-10"
                 />
               </div>
@@ -231,7 +345,7 @@ export const SectionPicker = ({
                   {filteredSections.length === 0 ? (
                     <div className="text-center py-8 text-corporate-gray-medium">
                       <p>
-                        {searchTerm 
+                        {sectionSearchTerm 
                           ? "Nema sekcija koje odgovaraju pretrazi" 
                           : "Nema sekcija u ovoj grupi"
                         }
