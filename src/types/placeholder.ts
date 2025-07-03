@@ -14,4 +14,5 @@ export interface Placeholder {
   type: 'string' | 'number' | 'date' | 'boolean' | 'enum';
   isNullable: boolean;
   enumValues?: string[];
+  group?: string;
 }

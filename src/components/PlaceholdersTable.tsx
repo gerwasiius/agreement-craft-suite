@@ -1,18 +1,18 @@
 
 import React from 'react';
-import { Copy } from 'lucide-react';
+import { Copy, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
 import { Placeholder } from '@/types/placeholder';
 
 interface PlaceholdersTableProps {
   placeholders: Placeholder[];
   onCopy: (value: string) => void;
+  onViewDetails: (placeholder: Placeholder) => void;
 }
 
-const PlaceholdersTable = ({ placeholders, onCopy }: PlaceholdersTableProps) => {
+const PlaceholdersTable = ({ placeholders, onCopy, onViewDetails }: PlaceholdersTableProps) => {
   const getTypeColor = (type: string) => {
     const colors = {
       string: "bg-blue-100 text-blue-800",
@@ -32,11 +32,10 @@ const PlaceholdersTable = ({ placeholders, onCopy }: PlaceholdersTableProps) => 
             <TableHead className="w-[150px]">Name</TableHead>
             <TableHead className="w-[200px]">Display Name</TableHead>
             <TableHead className="w-[250px]">Placeholder Value</TableHead>
-            <TableHead className="w-[300px]">Description</TableHead>
             <TableHead className="w-[100px]">Type</TableHead>
             <TableHead className="w-[80px]">Nullable</TableHead>
-            <TableHead className="w-[200px]">Enum Values</TableHead>
-            <TableHead className="w-[80px]">Actions</TableHead>
+            <TableHead className="w-[150px]">Enum Values</TableHead>
+            <TableHead className="w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -53,11 +52,6 @@ const PlaceholdersTable = ({ placeholders, onCopy }: PlaceholdersTableProps) => 
                   {placeholder.value}
                 </code>
               </TableCell>
-              <TableCell className="max-w-[300px]">
-                <span className="text-sm text-gray-600 line-clamp-2">
-                  {placeholder.description || 'No description'}
-                </span>
-              </TableCell>
               <TableCell>
                 <Badge className={getTypeColor(placeholder.type)}>
                   {placeholder.type}
@@ -71,14 +65,14 @@ const PlaceholdersTable = ({ placeholders, onCopy }: PlaceholdersTableProps) => 
               <TableCell>
                 {placeholder.enumValues && placeholder.enumValues.length > 0 ? (
                   <div className="flex flex-wrap gap-1">
-                    {placeholder.enumValues.slice(0, 3).map((value, index) => (
+                    {placeholder.enumValues.slice(0, 2).map((value, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {value}
                       </Badge>
                     ))}
-                    {placeholder.enumValues.length > 3 && (
+                    {placeholder.enumValues.length > 2 && (
                       <Badge variant="outline" className="text-xs">
-                        +{placeholder.enumValues.length - 3}
+                        +{placeholder.enumValues.length - 2}
                       </Badge>
                     )}
                   </div>
@@ -87,14 +81,24 @@ const PlaceholdersTable = ({ placeholders, onCopy }: PlaceholdersTableProps) => 
                 )}
               </TableCell>
               <TableCell>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onCopy(placeholder.value)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
+                <div className="flex space-x-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewDetails(placeholder)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onCopy(placeholder.value)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
