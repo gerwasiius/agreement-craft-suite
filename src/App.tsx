@@ -10,6 +10,7 @@ import Groups from "./pages/Groups";
 import GroupSelection from "./pages/GroupSelection";
 import Sections from "./pages/Sections";
 import Templates from "./pages/Templates";
+import Placeholders from "./pages/Placeholders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/group-selection" element={<GroupSelection />} />
             <Route path="/sections/:groupId" element={<Sections />} />
             <Route path="/templates" element={<Templates />} />
+            <Route path="/placeholders" element={<Placeholders />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
