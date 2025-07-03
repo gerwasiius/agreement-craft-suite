@@ -1,122 +1,160 @@
 
 import React, { useState, useMemo } from 'react';
-import { Search, Copy, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
 import { PlaceholderGroup, Placeholder } from '@/types/placeholder';
+import PlaceholdersTable from '@/components/PlaceholdersTable';
+import PlaceholdersPagination from '@/components/PlaceholdersPagination';
 
-// Mock data - replace with actual API call
+// Mock data with expanded properties
 const mockPlaceholders: Placeholder[] = [
   {
     id: "Client.Name",
     name: "Name",
     displayName: "Client Name",
-    value: "{{Client.Name}}"
+    value: "{{Client.Name}}",
+    description: "Full name of the client",
+    type: "string",
+    isNullable: false
   },
   {
     id: "Client.Email",
     name: "Email",
     displayName: "Email Address",
-    value: "{{Client.Email}}"
+    value: "{{Client.Email}}",
+    description: "Primary email address of the client",
+    type: "string",
+    isNullable: true
   },
   {
     id: "Client.Phone",
     name: "Phone",
     displayName: "Phone Number",
-    value: "{{Client.Phone}}"
+    value: "{{Client.Phone}}",
+    description: "Primary phone number of the client",
+    type: "string",
+    isNullable: true
+  },
+  {
+    id: "Client.Status",
+    name: "Status",
+    displayName: "Client Status",
+    value: "{{Client.Status}}",
+    description: "Current status of the client",
+    type: "enum",
+    isNullable: false,
+    enumValues: ["Active", "Inactive", "Pending", "Suspended"]
   },
   {
     id: "Contract.Number",
     name: "Number",
     displayName: "Contract Number",
-    value: "{{Contract.Number}}"
+    value: "{{Contract.Number}}",
+    description: "Unique contract identifier",
+    type: "string",
+    isNullable: false
   },
   {
     id: "Contract.Date",
     name: "Date",
     displayName: "Contract Date",
-    value: "{{Contract.Date}}"
+    value: "{{Contract.Date}}",
+    description: "Date when the contract was signed",
+    type: "date",
+    isNullable: false
   },
   {
     id: "Contract.Value",
     name: "Value",
     displayName: "Contract Value",
-    value: "{{Contract.Value}}"
+    value: "{{Contract.Value}}",
+    description: "Total monetary value of the contract",
+    type: "number",
+    isNullable: false
+  },
+  {
+    id: "Contract.IsActive",
+    name: "IsActive",
+    displayName: "Is Contract Active",
+    value: "{{Contract.IsActive}}",
+    description: "Whether the contract is currently active",
+    type: "boolean",
+    isNullable: false
   },
   {
     id: "Product.Name",
     name: "Name",
     displayName: "Product Name",
-    value: "{{Product.Name}}"
+    value: "{{Product.Name}}",
+    description: "Name of the product",
+    type: "string",
+    isNullable: false
   },
   {
     id: "Product.Price",
     name: "Price",
     displayName: "Product Price",
-    value: "{{Product.Price}}"
+    value: "{{Product.Price}}",
+    description: "Price of the product",
+    type: "number",
+    isNullable: false
+  },
+  {
+    id: "Product.Category",
+    name: "Category",
+    displayName: "Product Category",
+    value: "{{Product.Category}}",
+    description: "Category classification of the product",
+    type: "enum",
+    isNullable: false,
+    enumValues: ["Electronics", "Clothing", "Books", "Home", "Sports"]
   },
   {
     id: "Product.Description",
     name: "Description",
     displayName: "Product Description",
-    value: "{{Product.Description}}"
+    value: "{{Product.Description}}",
+    description: "Detailed description of the product",
+    type: "string",
+    isNullable: true
   }
 ];
 
 const Placeholders = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const { toast } = useToast();
 
-  // Group placeholders by entity
-  const groupedPlaceholders = useMemo(() => {
-    const groups: Record<string, PlaceholderGroup> = {};
-    
-    mockPlaceholders.forEach((placeholder) => {
-      const groupName = placeholder.id.split('.')[0];
-      
-      if (!groups[groupName]) {
-        groups[groupName] = {
-          id: groupName,
-          name: groupName,
-          placeholders: []
-        };
-      }
-      
-      groups[groupName].placeholders.push(placeholder);
-    });
-    
-    return Object.values(groups);
-  }, []);
-
-  // Filter groups based on search term
-  const filteredGroups = useMemo(() => {
-    if (!searchTerm) return groupedPlaceholders;
+  // Filter placeholders based on search term
+  const filteredPlaceholders = useMemo(() => {
+    if (!searchTerm) return mockPlaceholders;
     
     const searchLower = searchTerm.toLowerCase();
     
-    return groupedPlaceholders.map(group => ({
-      ...group,
-      placeholders: group.placeholders.filter(placeholder =>
-        placeholder.name.toLowerCase().includes(searchLower) ||
-        placeholder.displayName.toLowerCase().includes(searchLower) ||
-        placeholder.value.toLowerCase().includes(searchLower) ||
-        group.name.toLowerCase().includes(searchLower)
-      )
-    })).filter(group => group.placeholders.length > 0);
-  }, [groupedPlaceholders, searchTerm]);
+    return mockPlaceholders.filter(placeholder =>
+      placeholder.name.toLowerCase().includes(searchLower) ||
+      placeholder.displayName.toLowerCase().includes(searchLower) ||
+      placeholder.value.toLowerCase().includes(searchLower) ||
+      placeholder.description?.toLowerCase().includes(searchLower) ||
+      placeholder.type.toLowerCase().includes(searchLower) ||
+      placeholder.id.split('.')[0].toLowerCase().includes(searchLower) ||
+      placeholder.enumValues?.some(val => val.toLowerCase().includes(searchLower))
+    );
+  }, [searchTerm]);
 
-  const toggleGroup = (groupId: string) => {
-    setOpenGroups(prev => ({
-      ...prev,
-      [groupId]: !prev[groupId]
-    }));
-  };
+  // Pagination calculations
+  const totalItems = filteredPlaceholders.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedPlaceholders = filteredPlaceholders.slice(startIndex, startIndex + pageSize);
+
+  // Reset to first page when search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const copyToClipboard = async (value: string) => {
     try {
@@ -134,15 +172,9 @@ const Placeholders = () => {
     }
   };
 
-  const getTypeColor = (type: string) => {
-    const colors = {
-      string: "bg-blue-100 text-blue-800",
-      number: "bg-green-100 text-green-800",
-      date: "bg-purple-100 text-purple-800",
-      boolean: "bg-orange-100 text-orange-800",
-      enum: "bg-pink-100 text-pink-800",
-    };
-    return colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
   };
 
   return (
@@ -167,100 +199,50 @@ const Placeholders = () => {
         />
       </div>
 
-      {/* Results count */}
+      {/* Results summary */}
       <div className="text-sm text-corporate-gray-medium">
-        {filteredGroups.length} group(s) found, {filteredGroups.reduce((acc, group) => acc + group.placeholders.length, 0)} placeholder(s) total
+        Showing {startIndex + 1}-{Math.min(startIndex + pageSize, totalItems)} of {totalItems} placeholder(s)
+        {searchTerm && ` matching "${searchTerm}"`}
       </div>
 
-      {/* Groups */}
-      <div className="space-y-4">
-        {filteredGroups.map((group) => (
-          <Card key={group.id} className="w-full">
-            <Collapsible
-              open={openGroups[group.id] ?? true}
-              onOpenChange={() => toggleGroup(group.id)}
-            >
-              <CollapsibleTrigger asChild>
-                <CardHeader className="hover:bg-gray-50 transition-colors cursor-pointer">
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl font-semibold text-corporate-black">
-                        {group.name}
-                      </span>
-                      <Badge variant="secondary" className="ml-2">
-                        {group.placeholders.length}
-                      </Badge>
-                    </div>
-                    {openGroups[group.id] ?? true ? (
-                      <ChevronDown className="h-5 w-5" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5" />
-                    )}
-                  </CardTitle>
-                </CardHeader>
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent>
-                <CardContent className="pt-0">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[200px]">Name</TableHead>
-                          <TableHead className="w-[250px]">Display Name</TableHead>
-                          <TableHead className="w-[300px]">Placeholder Value</TableHead>
-                          <TableHead className="w-[100px]">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {group.placeholders.map((placeholder) => (
-                          <TableRow key={placeholder.id} className="hover:bg-gray-50">
-                            <TableCell className="font-medium">
-                              {placeholder.name}
-                            </TableCell>
-                            <TableCell>
-                              {placeholder.displayName}
-                            </TableCell>
-                            <TableCell>
-                              <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                                {placeholder.value}
-                              </code>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => copyToClipboard(placeholder.value)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Copy className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
-        ))}
-      </div>
-
-      {filteredGroups.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-gray-400 mb-2">
-            <Search className="h-12 w-12 mx-auto" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">
-            No placeholders found
-          </h3>
-          <p className="text-gray-500">
-            Try adjusting your search terms
-          </p>
-        </div>
-      )}
+      {/* Table */}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            All Placeholders
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {paginatedPlaceholders.length > 0 ? (
+            <>
+              <PlaceholdersTable 
+                placeholders={paginatedPlaceholders}
+                onCopy={copyToClipboard}
+              />
+              <PlaceholdersPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-2">
+                <Search className="h-12 w-12 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">
+                No placeholders found
+              </h3>
+              <p className="text-gray-500">
+                Try adjusting your search terms
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -10,4 +10,8 @@ export interface Placeholder {
   name: string;
   displayName: string;
   value: string;
+  description?: string;
+  type: 'string' | 'number' | 'date' | 'boolean' | 'enum';
+  isNullable: boolean;
+  enumValues?: string[];
 }
