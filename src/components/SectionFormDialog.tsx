@@ -1,152 +1,241 @@
-
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { WysiwygEditor } from "@/components/WysiwygEditor";
-import { PlaceholderList } from "@/components/PlaceholderList";
-import { Plus } from "lucide-react";
-import { Section, SectionFormData } from "@/types/section";
-import { PlaceholderGroup } from "@/types/placeholder";
+import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Section } from '@/types/section';
+import { Placeholder } from '@/types/placeholder';
 
 interface SectionFormDialogProps {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  editingSection: Section | null;
-  formData: SectionFormData;
-  onFormDataChange: (data: SectionFormData) => void;
-  onSubmit: () => void;
-  groupName: string;
+  onClose: () => void;
+  onSubmit: (section: Section) => void;
+  initialValues?: Section;
 }
 
-// Sample placeholder data - this would typically come from props or API
-const placeholderGroups: PlaceholderGroup[] = [
-  {
-    id: "klijent",
-    name: "Klijent",
-    placeholders: [
-      { id: "klijent_ime", name: "Klijent_ime", displayName: "Ime klijenta", value: "{{Klijent_ime}}" },
-      { id: "klijent_prezime", name: "Klijent_prezime", displayName: "Prezime klijenta", value: "{{Klijent_prezime}}" },
-      { id: "klijent_email", name: "Klijent_email", displayName: "Email klijenta", value: "{{Klijent_email}}" },
-      { id: "klijent_telefon", name: "Klijent_telefon", displayName: "Telefon klijenta", value: "{{Klijent_telefon}}" }
-    ]
-  },
-  {
-    id: "ugovor",
-    name: "Ugovor",
-    placeholders: [
-      { id: "ugovor_broj", name: "Ugovor_broj", displayName: "Broj ugovora", value: "{{Ugovor_broj}}" },
-      { id: "ugovor_datum", name: "Ugovor_datum", displayName: "Datum ugovora", value: "{{Ugovor_datum}}" },
-      { id: "ugovor_vrednost", name: "Ugovor_vrednost", displayName: "Vrednost ugovora", value: "{{Ugovor_vrednost}}" }
-    ]
-  },
-  {
-    id: "kompanija",
-    name: "Kompanija",
-    placeholders: [
-      { id: "kompanija_naziv", name: "Kompanija_naziv", displayName: "Naziv kompanije", value: "{{Kompanija_naziv}}" },
-      { id: "kompanija_adresa", name: "Kompanija_adresa", displayName: "Adresa kompanije", value: "{{Kompanija_adresa}}" },
-      { id: "kompanija_pib", name: "Kompanija_pib", displayName: "PIB kompanije", value: "{{Kompanija_pib}}" }
-    ]
-  }
-];
+const SectionFormDialog = ({ isOpen, onClose, onSubmit, initialValues }: SectionFormDialogProps) => {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [content, setContent] = useState('');
+  const [selectedPlaceholders, setSelectedPlaceholders] = useState<string[]>([]);
 
-export const SectionFormDialog = ({
-  isOpen,
-  onOpenChange,
-  editingSection,
-  formData,
-  onFormDataChange,
-  onSubmit,
-  groupName
-}: SectionFormDialogProps) => {
+  useEffect(() => {
+    if (initialValues) {
+      setName(initialValues.name);
+      setDescription(initialValues.description || '');
+      setContent(initialValues.content);
+      setSelectedPlaceholders(initialValues.placeholders || []);
+    } else {
+      // Reset form fields when opening in create mode
+      setName('');
+      setDescription('');
+      setContent('');
+      setSelectedPlaceholders([]);
+    }
+  }, [initialValues, isOpen]);
+
+  const handleSubmit = () => {
+    const sectionData: Section = {
+      id: initialValues?.id || Math.random().toString(36).substring(7),
+      name: name,
+      description: description,
+      content: content,
+      placeholders: selectedPlaceholders,
+    };
+    onSubmit(sectionData);
+    onClose();
+  };
+
+  const togglePlaceholder = (placeholderId: string) => {
+    setSelectedPlaceholders((prev) =>
+      prev.includes(placeholderId)
+        ? prev.filter((id) => id !== placeholderId)
+        : [...prev, placeholderId]
+    );
+  };
+
+  const mockPlaceholders: Placeholder[] = [
+    {
+      id: "Client.Name",
+      name: "Name",
+      displayName: "Client Name",
+      value: "{{Client.Name}}",
+      type: "string",
+      isNullable: false,
+      group: "Client"
+    },
+    {
+      id: "Client.Email",
+      name: "Email",
+      displayName: "Client Email",
+      value: "{{Client.Email}}",
+      type: "string",
+      isNullable: true,
+      group: "Client"
+    },
+    {
+      id: "Client.Phone",
+      name: "Phone",
+      displayName: "Client Phone",
+      value: "{{Client.Phone}}",
+      type: "string",
+      isNullable: true,
+      group: "Client"
+    },
+    {
+      id: "Client.Status",
+      name: "Status",
+      displayName: "Client Status",
+      value: "{{Client.Status}}",
+      type: "enum",
+      isNullable: false,
+      enumValues: ["Active", "Inactive"],
+      group: "Client"
+    },
+    // Contract placeholders
+    {
+      id: "Contract.Number",
+      name: "Number",
+      displayName: "Contract Number",
+      value: "{{Contract.Number}}",
+      type: "string",
+      isNullable: false,
+      group: "Contract"
+    },
+    {
+      id: "Contract.Date",
+      name: "Date",
+      displayName: "Contract Date",
+      value: "{{Contract.Date}}",
+      type: "date",
+      isNullable: false,
+      group: "Contract"
+    },
+    {
+      id: "Contract.Value",
+      name: "Value",
+      displayName: "Contract Value",
+      value: "{{Contract.Value}}",
+      type: "number",
+      isNullable: false,
+      group: "Contract"
+    },
+    // Product placeholders
+    {
+      id: "Product.Name",
+      name: "Name",
+      displayName: "Product Name",
+      value: "{{Product.Name}}",
+      type: "string",
+      isNullable: false,
+      group: "Product"
+    },
+    {
+      id: "Product.Price",
+      name: "Price",
+      displayName: "Product Price",
+      value: "{{Product.Price}}",
+      type: "number",
+      isNullable: false,
+      group: "Product"
+    },
+    {
+      id: "Product.Category",
+      name: "Category",
+      displayName: "Product Category",
+      value: "{{Product.Category}}",
+      type: "enum",
+      isNullable: false,
+      enumValues: ["Electronics", "Clothing"],
+      group: "Product"
+    }
+  ];
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button className="corporate-button-primary flex items-center gap-2">
-          <Plus size={16} />
-          Nova Sekcija
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto bg-white">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle className="text-corporate-black">
-            {editingSection ? "Izmena Sekcije" : "Nova Sekcija"}
+          <DialogTitle className="flex items-center justify-between">
+            <span>{initialValues ? 'Edit Section' : 'Create Section'}</span>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
           </DialogTitle>
-          <DialogDescription>
-            {editingSection 
-              ? "Izmenite podatke o sekciji dokumenta." 
-              : `Kreirajte novu sekciju za grupu "${groupName}".`
-            }
-          </DialogDescription>
         </DialogHeader>
+
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Naziv sekcije</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => onFormDataChange({ ...formData, name: e.target.value })}
-                placeholder="Unesite naziv sekcije..."
-                className="corporate-input"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="version">Verzija</Label>
-              <Input
-                id="version"
-                value={formData.version}
-                onChange={(e) => onFormDataChange({ ...formData, version: e.target.value })}
-                placeholder="npr. 1.0, 2.1..."
-                className="corporate-input"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Opis</Label>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
             <Input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="description" className="text-right">
+              Description
+            </Label>
+            <Input
+              type="text"
               id="description"
-              value={formData.description}
-              onChange={(e) => onFormDataChange({ ...formData, description: e.target.value })}
-              placeholder="Kratki opis sekcije..."
-              className="corporate-input"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="col-span-3"
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="isActive"
-              checked={formData.isActive}
-              onCheckedChange={(checked) => onFormDataChange({ ...formData, isActive: checked })}
-            />
-            <Label htmlFor="isActive">Aktivna verzija</Label>
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label htmlFor="content" className="text-right mt-2">
+              Content
+            </Label>
+            <div className="col-span-3">
+              <Textarea
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full"
+                rows={5}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label>Sadržaj sekcije</Label>
-            <div className="grid grid-cols-4 gap-4">
-              <div className="col-span-1">
-                <PlaceholderList placeholderGroups={placeholderGroups} />
-              </div>
-              <div className="col-span-3">
-                <WysiwygEditor
-                  content={formData.content}
-                  onChange={(content) => onFormDataChange({ ...formData, content })}
-                />
-              </div>
+
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label className="text-right mt-2">
+              Placeholders
+            </Label>
+            <div className="col-span-3 space-y-2">
+              {mockPlaceholders.map((placeholder) => (
+                <div key={placeholder.id} className="flex items-center space-x-2">
+                  <Input
+                    type="checkbox"
+                    id={placeholder.id}
+                    checked={selectedPlaceholders.includes(placeholder.id)}
+                    onChange={() => togglePlaceholder(placeholder.id)}
+                  />
+                  <Label htmlFor={placeholder.id} className="cursor-pointer">
+                    {placeholder.displayName} ({placeholder.name})
+                  </Label>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-        <DialogFooter>
-          <Button 
-            type="submit" 
-            onClick={onSubmit}
-            className="corporate-button-primary"
-          >
-            {editingSection ? "Sačuvaj izmene" : "Kreiraj sekciju"}
+
+        <div className="flex justify-end">
+          <Button type="submit" onClick={handleSubmit}>
+            {initialValues ? 'Update Section' : 'Create Section'}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
 };
+
+export default SectionFormDialog;

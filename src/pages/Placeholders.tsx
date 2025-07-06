@@ -1,20 +1,17 @@
-
 import React, { useState, useMemo } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Placeholder } from '@/types/placeholder';
-import PlaceholdersTable from '@/components/PlaceholdersTable';
-import PlaceholdersPagination from '@/components/PlaceholdersPagination';
+import PlaceholderGroupCard from '@/components/PlaceholderGroupCard';
 import PlaceholderDetailsModal from '@/components/PlaceholderDetailsModal';
 
 // Mock data with expanded properties
 const mockPlaceholders: Placeholder[] = [
   {
     id: "Client.Name",
-    name: "Name",
+    name: "Name", 
     displayName: "Client Name",
     value: "{{Client.Name}}",
     description: "Full name of the client",
@@ -138,55 +135,44 @@ const mockPlaceholders: Placeholder[] = [
 
 const Placeholders = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
   const [selectedPlaceholder, setSelectedPlaceholder] = useState<Placeholder | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
-  // Get unique groups for filter
-  const availableGroups = useMemo(() => {
-    const groups = Array.from(new Set(mockPlaceholders.map(p => p.group).filter(Boolean)));
-    return groups.sort();
-  }, []);
+  // Group placeholders by group
+  const groupedPlaceholders = useMemo(() => {
+    const groups = new Map<string, Placeholder[]>();
+    
+    mockPlaceholders.forEach(placeholder => {
+      const groupName = placeholder.group || 'Other';
+      if (!groups.has(groupName)) {
+        groups.set(groupName, []);
+      }
+      groups.get(groupName)!.push(placeholder);
+    });
 
-  // Filter placeholders based on search term and group
-  const filteredPlaceholders = useMemo(() => {
-    let filtered = mockPlaceholders;
+    return Array.from(groups.entries()).map(([name, placeholders]) => ({
+      name,
+      placeholders: placeholders.filter(p => {
+        if (!searchTerm) return true;
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          p.name.toLowerCase().includes(searchLower) ||
+          p.displayName.toLowerCase().includes(searchLower) ||
+          p.value.toLowerCase().includes(searchLower) ||
+          p.description?.toLowerCase().includes(searchLower) ||
+          p.type.toLowerCase().includes(searchLower) ||
+          p.enumValues?.some(val => val.toLowerCase().includes(searchLower))
+        );
+      })
+    })).filter(group => group.placeholders.length > 0);
+  }, [searchTerm]);
 
-    // Filter by group
-    if (selectedGroup !== 'all') {
-      filtered = filtered.filter(placeholder => placeholder.group === selectedGroup);
-    }
-
-    // Filter by search term
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(placeholder =>
-        placeholder.name.toLowerCase().includes(searchLower) ||
-        placeholder.displayName.toLowerCase().includes(searchLower) ||
-        placeholder.value.toLowerCase().includes(searchLower) ||
-        placeholder.description?.toLowerCase().includes(searchLower) ||
-        placeholder.type.toLowerCase().includes(searchLower) ||
-        placeholder.group?.toLowerCase().includes(searchLower) ||
-        placeholder.enumValues?.some(val => val.toLowerCase().includes(searchLower))
-      );
-    }
-
-    return filtered;
-  }, [searchTerm, selectedGroup]);
-
-  // Pagination calculations
-  const totalItems = filteredPlaceholders.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedPlaceholders = filteredPlaceholders.slice(startIndex, startIndex + pageSize);
-
-  // Reset to first page when search or group changes
+  // Reset to first group when search changes
   React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedGroup]);
+    setCurrentGroupIndex(0);
+  }, [searchTerm]);
 
   const copyToClipboard = async (value: string) => {
     try {
@@ -204,11 +190,6 @@ const Placeholders = () => {
     }
   };
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-    setCurrentPage(1);
-  };
-
   const handleViewDetails = (placeholder: Placeholder) => {
     setSelectedPlaceholder(placeholder);
     setIsModalOpen(true);
@@ -219,6 +200,8 @@ const Placeholders = () => {
     setSelectedPlaceholder(null);
   };
 
+  const currentGroup = groupedPlaceholders[currentGroupIndex];
+
   return (
     <div className="space-y-6">
       <div>
@@ -226,88 +209,68 @@ const Placeholders = () => {
           Placeholders
         </h1>
         <p className="text-corporate-gray-medium">
-          Browse and copy placeholders for use in document templates
+          Browse placeholders by group - {groupedPlaceholders.length} group(s) available
         </p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search placeholders..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        {/* Group Filter */}
-        <div className="flex items-center space-x-2">
-          <Filter className="h-4 w-4 text-gray-400" />
-          <Select value={selectedGroup} onValueChange={setSelectedGroup}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by group" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Groups</SelectItem>
-              {availableGroups.map((group) => (
-                <SelectItem key={group} value={group}>
-                  {group}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Input
+          placeholder="Search placeholders..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
       </div>
 
-      {/* Results summary */}
-      <div className="text-sm text-corporate-gray-medium">
-        Showing {startIndex + 1}-{Math.min(startIndex + pageSize, totalItems)} of {totalItems} placeholder(s)
-        {searchTerm && ` matching "${searchTerm}"`}
-        {selectedGroup !== 'all' && ` in group "${selectedGroup}"`}
-      </div>
+      {/* Group Navigation */}
+      {groupedPlaceholders.length > 0 && (
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentGroupIndex(Math.max(0, currentGroupIndex - 1))}
+            disabled={currentGroupIndex === 0}
+          >
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Previous Group
+          </Button>
+          
+          <div className="text-sm text-gray-600">
+            Group {currentGroupIndex + 1} of {groupedPlaceholders.length}
+          </div>
+          
+          <Button
+            variant="outline"
+            onClick={() => setCurrentGroupIndex(Math.min(groupedPlaceholders.length - 1, currentGroupIndex + 1))}
+            disabled={currentGroupIndex === groupedPlaceholders.length - 1}
+          >
+            Next Group
+            <ChevronRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+      )}
 
-      {/* Table */}
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">
-            All Placeholders
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {paginatedPlaceholders.length > 0 ? (
-            <>
-              <PlaceholdersTable 
-                placeholders={paginatedPlaceholders}
-                onCopy={copyToClipboard}
-                onViewDetails={handleViewDetails}
-              />
-              <PlaceholdersPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                pageSize={pageSize}
-                totalItems={totalItems}
-                onPageChange={setCurrentPage}
-                onPageSizeChange={handlePageSizeChange}
-              />
-            </>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-2">
-                <Search className="h-12 w-12 mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-1">
-                No placeholders found
-              </h3>
-              <p className="text-gray-500">
-                Try adjusting your search terms or group filter
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Current Group Card */}
+      {currentGroup ? (
+        <PlaceholderGroupCard
+          group={currentGroup}
+          onCopy={copyToClipboard}
+          onViewDetails={handleViewDetails}
+        />
+      ) : (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-2">
+            <Search className="h-12 w-12 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">
+            No placeholders found
+          </h3>
+          <p className="text-gray-500">
+            Try adjusting your search terms
+          </p>
+        </div>
+      )}
 
       {/* Details Modal */}
       <PlaceholderDetailsModal
