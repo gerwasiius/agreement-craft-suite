@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import SectionFormDialog from "./SectionFormDialog";
 import { Section, SectionFormData } from "@/types/section";
 
@@ -18,12 +19,6 @@ interface SectionsPageHeaderProps {
 export const SectionsPageHeader = ({
   groupName,
   onBackClick,
-  isDialogOpen,
-  onDialogOpenChange,
-  editingSection,
-  formData,
-  onFormDataChange,
-  onSubmit,
   onNewSectionClick
 }: SectionsPageHeaderProps) => {
   return (
@@ -45,17 +40,18 @@ export const SectionsPageHeader = ({
           Upravljanje sekcijama dokumenata za grupu "{groupName}"
         </p>
       </div>
-      <div onClick={onNewSectionClick}>
-        <SectionFormDialog
-          isOpen={isDialogOpen}
-          onOpenChange={onDialogOpenChange}
-          editingSection={editingSection}
-          formData={formData}
-          onFormDataChange={onFormDataChange}
-          onSubmit={onSubmit}
-          groupName={groupName}
-        />
-      </div>
+      <SectionFormDialog
+        onSave={(section) => {
+          // This will be handled by the parent component
+          console.log('New section:', section);
+        }}
+        trigger={
+          <Button onClick={onNewSectionClick} className="corporate-button-primary">
+            <Plus size={16} className="mr-2" />
+            Nova sekcija
+          </Button>
+        }
+      />
     </div>
   );
 };

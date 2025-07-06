@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ const SectionFormDialog = ({ onSave, trigger }: SectionFormDialogProps) => {
     content: '',
     order: 0,
     groupId: '',
-    version: 1,
+    version: '1.0',
     createdAt: new Date().toISOString().split('T')[0],
     isActive: true
   });
@@ -38,7 +39,7 @@ const SectionFormDialog = ({ onSave, trigger }: SectionFormDialogProps) => {
       content: '', 
       order: 0, 
       groupId: '', 
-      version: 1, 
+      version: '1.0', 
       createdAt: new Date().toISOString().split('T')[0], 
       isActive: true 
     });
