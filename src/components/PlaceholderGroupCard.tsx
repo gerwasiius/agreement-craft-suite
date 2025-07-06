@@ -27,30 +27,30 @@ const PlaceholderGroupCard = ({ group, onViewDetails }: PlaceholderGroupCardProp
   };
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl">{group.name}</CardTitle>
+        <CardTitle className="text-2xl">{group.name}</CardTitle>
         <CardDescription>
-          {group.placeholders.length} placeholder(s)
+          {group.placeholders.length} placeholder(s) in this group
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {group.placeholders.map((placeholder) => (
-            <div key={placeholder.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+            <div key={placeholder.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 mb-2">
                   <h4 className="font-medium text-sm truncate">{placeholder.displayName}</h4>
                   <Badge className={`${getTypeColor(placeholder.type)} text-xs`}>
                     {placeholder.type}
                   </Badge>
-                  {!placeholder.isNullable && (
-                    <Badge variant="outline" className="text-xs">
-                      Required
-                    </Badge>
-                  )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1 truncate">{placeholder.name}</p>
+                <p className="text-xs text-gray-500 truncate mb-1">{placeholder.name}</p>
+                {!placeholder.isNullable && (
+                  <Badge variant="outline" className="text-xs">
+                    Required
+                  </Badge>
+                )}
               </div>
               <Button
                 variant="outline"

@@ -20,13 +20,29 @@ const SectionFormDialog = ({ onSave, trigger }: SectionFormDialogProps) => {
     description: '',
     content: '',
     order: 0,
+    groupId: '',
+    version: 1,
+    createdAt: new Date(),
+    isActive: true
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({
+      ...formData,
+      createdAt: new Date()
+    });
     setOpen(false);
-    setFormData({ name: '', description: '', content: '', order: 0 });
+    setFormData({ 
+      name: '', 
+      description: '', 
+      content: '', 
+      order: 0, 
+      groupId: '', 
+      version: 1, 
+      createdAt: new Date(), 
+      isActive: true 
+    });
   };
 
   return (

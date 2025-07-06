@@ -1,7 +1,8 @@
+
 import React, { useState, useMemo } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Placeholder } from '@/types/placeholder';
 import PlaceholderGroupCard from '@/components/PlaceholderGroupCard';
@@ -135,18 +136,12 @@ const mockPlaceholders: Placeholder[] = [
 
 const Placeholders = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState<string>('all');
+  const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
   const [selectedPlaceholder, setSelectedPlaceholder] = useState<Placeholder | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
-  // Get unique groups for filter
-  const availableGroups = useMemo(() => {
-    const groups = Array.from(new Set(mockPlaceholders.map(p => p.group || 'Other')));
-    return groups.sort();
-  }, []);
-
-  // Group placeholders by group with filters applied
+  // Group placeholders by group with search filter applied
   const groupedPlaceholders = useMemo(() => {
     const groups = new Map<string, Placeholder[]>();
     
@@ -161,12 +156,6 @@ const Placeholders = () => {
     return Array.from(groups.entries()).map(([name, placeholders]) => ({
       name,
       placeholders: placeholders.filter(p => {
-        // Group filter
-        if (selectedGroup !== 'all' && p.group !== selectedGroup) {
-          return false;
-        }
-        
-        // Search filter
         if (!searchTerm) return true;
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -179,7 +168,10 @@ const Placeholders = () => {
         );
       })
     })).filter(group => group.placeholders.length > 0);
-  }, [searchTerm, selectedGroup]);
+  }, [searchTerm]);
+
+  const currentGroup = groupedPlaceholders[currentGroupIndex];
+  const totalGroups = groupedPlaceholders.length;
 
   const copyToClipboard = async (value: string) => {
     try {
@@ -207,6 +199,14 @@ const Placeholders = () => {
     setSelectedPlaceholder(null);
   };
 
+  const goToPreviousGroup = () => {
+    setCurrentGroupIndex(Math.max(0, currentGroupIndex - 1));
+  };
+
+  const goToNextGroup = () => {
+    setCurrentGroupIndex(Math.min(totalGroups - 1, currentGroupIndex + 1));
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -214,12 +214,12 @@ const Placeholders = () => {
           Placeholders
         </h1>
         <p className="text-corporate-gray-medium">
-          Browse all available placeholders grouped by category
+          Browse placeholders by group - one group per page
         </p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Search */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
@@ -229,33 +229,43 @@ const Placeholders = () => {
             className="pl-10"
           />
         </div>
-        
-        <Select value={selectedGroup} onValueChange={setSelectedGroup}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Filter by group" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Groups</SelectItem>
-            {availableGroups.map((group) => (
-              <SelectItem key={group} value={group}>
-                {group}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        {/* Group Navigation */}
+        {totalGroups > 0 && (
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToPreviousGroup}
+              disabled={currentGroupIndex === 0}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Previous
+            </Button>
+            
+            <span className="text-sm font-medium px-3 py-1 bg-gray-100 rounded">
+              {currentGroupIndex + 1} of {totalGroups}
+            </span>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToNextGroup}
+              disabled={currentGroupIndex === totalGroups - 1}
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Groups Grid */}
-      {groupedPlaceholders.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {groupedPlaceholders.map((group) => (
-            <PlaceholderGroupCard
-              key={group.name}
-              group={group}
-              onViewDetails={handleViewDetails}
-            />
-          ))}
-        </div>
+      {/* Current Group Card */}
+      {currentGroup ? (
+        <PlaceholderGroupCard
+          group={currentGroup}
+          onViewDetails={handleViewDetails}
+        />
       ) : (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-2">
@@ -265,7 +275,7 @@ const Placeholders = () => {
             No placeholders found
           </h3>
           <p className="text-gray-500">
-            Try adjusting your search terms or group filter
+            Try adjusting your search terms
           </p>
         </div>
       )}
