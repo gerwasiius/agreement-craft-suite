@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Copy, Eye } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { Placeholder } from '@/types/placeholder';
 
 interface PlaceholderGroupCardProps {
@@ -11,11 +11,10 @@ interface PlaceholderGroupCardProps {
     name: string;
     placeholders: Placeholder[];
   };
-  onCopy: (value: string) => void;
   onViewDetails: (placeholder: Placeholder) => void;
 }
 
-const PlaceholderGroupCard = ({ group, onCopy, onViewDetails }: PlaceholderGroupCardProps) => {
+const PlaceholderGroupCard = ({ group, onViewDetails }: PlaceholderGroupCardProps) => {
   const getTypeColor = (type: string) => {
     const colors = {
       string: "bg-blue-100 text-blue-800",
@@ -35,58 +34,35 @@ const PlaceholderGroupCard = ({ group, onCopy, onViewDetails }: PlaceholderGroup
           {group.placeholders.length} placeholder(s)
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {group.placeholders.map((placeholder) => (
-          <div key={placeholder.id} className="border rounded-lg p-4 space-y-3">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">{placeholder.displayName}</h4>
-                <p className="text-xs text-gray-500 mt-1">{placeholder.name}</p>
-                {placeholder.description && (
-                  <p className="text-sm text-gray-600 mt-2">{placeholder.description}</p>
-                )}
+      <CardContent>
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {group.placeholders.map((placeholder) => (
+            <div key={placeholder.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-2">
+                  <h4 className="font-medium text-sm truncate">{placeholder.displayName}</h4>
+                  <Badge className={`${getTypeColor(placeholder.type)} text-xs`}>
+                    {placeholder.type}
+                  </Badge>
+                  {!placeholder.isNullable && (
+                    <Badge variant="outline" className="text-xs">
+                      Required
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1 truncate">{placeholder.name}</p>
               </div>
-              <div className="flex space-x-1 ml-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onViewDetails(placeholder)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onCopy(placeholder.value)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onViewDetails(placeholder)}
+                className="ml-2 h-8 w-8 p-0 flex-shrink-0"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
             </div>
-            
-            <div className="flex flex-wrap gap-2">
-              <Badge className={getTypeColor(placeholder.type)}>
-                {placeholder.type}
-              </Badge>
-              <Badge variant={placeholder.isNullable ? "secondary" : "outline"}>
-                {placeholder.isNullable ? "Nullable" : "Required"}
-              </Badge>
-              {placeholder.enumValues && placeholder.enumValues.length > 0 && (
-                <Badge variant="outline" className="text-xs">
-                  {placeholder.enumValues.length} values
-                </Badge>
-              )}
-            </div>
-
-            <div>
-              <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                {placeholder.value}
-              </code>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

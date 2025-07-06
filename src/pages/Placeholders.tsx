@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Placeholder } from '@/types/placeholder';
 import PlaceholderGroupCard from '@/components/PlaceholderGroupCard';
@@ -135,12 +135,18 @@ const mockPlaceholders: Placeholder[] = [
 
 const Placeholders = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
+  const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedPlaceholder, setSelectedPlaceholder] = useState<Placeholder | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
-  // Group placeholders by group
+  // Get unique groups for filter
+  const availableGroups = useMemo(() => {
+    const groups = Array.from(new Set(mockPlaceholders.map(p => p.group || 'Other')));
+    return groups.sort();
+  }, []);
+
+  // Group placeholders by group with filters applied
   const groupedPlaceholders = useMemo(() => {
     const groups = new Map<string, Placeholder[]>();
     
@@ -155,6 +161,12 @@ const Placeholders = () => {
     return Array.from(groups.entries()).map(([name, placeholders]) => ({
       name,
       placeholders: placeholders.filter(p => {
+        // Group filter
+        if (selectedGroup !== 'all' && p.group !== selectedGroup) {
+          return false;
+        }
+        
+        // Search filter
         if (!searchTerm) return true;
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -167,12 +179,7 @@ const Placeholders = () => {
         );
       })
     })).filter(group => group.placeholders.length > 0);
-  }, [searchTerm]);
-
-  // Reset to first group when search changes
-  React.useEffect(() => {
-    setCurrentGroupIndex(0);
-  }, [searchTerm]);
+  }, [searchTerm, selectedGroup]);
 
   const copyToClipboard = async (value: string) => {
     try {
@@ -200,8 +207,6 @@ const Placeholders = () => {
     setSelectedPlaceholder(null);
   };
 
-  const currentGroup = groupedPlaceholders[currentGroupIndex];
-
   return (
     <div className="space-y-6">
       <div>
@@ -209,55 +214,48 @@ const Placeholders = () => {
           Placeholders
         </h1>
         <p className="text-corporate-gray-medium">
-          Browse placeholders by group - {groupedPlaceholders.length} group(s) available
+          Browse all available placeholders grouped by category
         </p>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
-          placeholder="Search placeholders..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search placeholders..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        
+        <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="Filter by group" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Groups</SelectItem>
+            {availableGroups.map((group) => (
+              <SelectItem key={group} value={group}>
+                {group}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Group Navigation */}
-      {groupedPlaceholders.length > 0 && (
-        <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentGroupIndex(Math.max(0, currentGroupIndex - 1))}
-            disabled={currentGroupIndex === 0}
-          >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Previous Group
-          </Button>
-          
-          <div className="text-sm text-gray-600">
-            Group {currentGroupIndex + 1} of {groupedPlaceholders.length}
-          </div>
-          
-          <Button
-            variant="outline"
-            onClick={() => setCurrentGroupIndex(Math.min(groupedPlaceholders.length - 1, currentGroupIndex + 1))}
-            disabled={currentGroupIndex === groupedPlaceholders.length - 1}
-          >
-            Next Group
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
+      {/* Groups Grid */}
+      {groupedPlaceholders.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {groupedPlaceholders.map((group) => (
+            <PlaceholderGroupCard
+              key={group.name}
+              group={group}
+              onViewDetails={handleViewDetails}
+            />
+          ))}
         </div>
-      )}
-
-      {/* Current Group Card */}
-      {currentGroup ? (
-        <PlaceholderGroupCard
-          group={currentGroup}
-          onCopy={copyToClipboard}
-          onViewDetails={handleViewDetails}
-        />
       ) : (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-2">
@@ -267,7 +265,7 @@ const Placeholders = () => {
             No placeholders found
           </h3>
           <p className="text-gray-500">
-            Try adjusting your search terms
+            Try adjusting your search terms or group filter
           </p>
         </div>
       )}
