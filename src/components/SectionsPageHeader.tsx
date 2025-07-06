@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { SectionFormDialog } from "./SectionFormDialog";
+import SectionFormDialog from "./SectionFormDialog";
 import { Section, SectionFormData } from "@/types/section";
 
 interface SectionsPageHeaderProps {
