@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SectionCondition } from "@/types/template";
 import { Plus, X } from "lucide-react";
+import { PlaceholderPicker } from "./PlaceholderPicker";
+import { Placeholder } from "@/types/placeholder";
 
 interface SectionConditionsProps {
   conditions: SectionCondition[];
@@ -51,6 +53,14 @@ export function SectionConditions({ conditions, onChange }: SectionConditionsPro
 
   const needsVariable = (type: string) => {
     return ['variable_equals', 'variable_not_equals', 'variable_contains'].includes(type);
+  };
+
+  const handlePlaceholderSelect = (placeholder: Placeholder) => {
+    setNewCondition(prev => ({ 
+      ...prev, 
+      variableName: placeholder.value.replace(/[{}]/g, ''), // Uklanja {{ i }}
+      description: prev.description || `Uslov za ${placeholder.displayName}`
+    }));
   };
 
   return (
@@ -122,14 +132,17 @@ export function SectionConditions({ conditions, onChange }: SectionConditionsPro
             </div>
 
             {needsVariable(newCondition.type || '') && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <div className="space-y-1">
-                  <Label className="text-xs">Ime varijable</Label>
-                  <Input
-                    value={newCondition.variableName || ''}
-                    onChange={(e) => setNewCondition(prev => ({ ...prev, variableName: e.target.value }))}
-                    placeholder="npr. ime_klijenta"
-                    className="h-8 text-sm"
+                  <Label className="text-xs">Placeholder</Label>
+                  <PlaceholderPicker
+                    selectedValue={newCondition.variableName ? `{{${newCondition.variableName}}}` : undefined}
+                    onSelect={handlePlaceholderSelect}
+                    trigger={
+                      <Button variant="outline" className="w-full h-8 justify-start text-xs">
+                        {newCondition.variableName ? `{{${newCondition.variableName}}}` : "Odaberite placeholder..."}
+                      </Button>
+                    }
                   />
                 </div>
                 
