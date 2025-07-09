@@ -40,7 +40,8 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
         // Create a span element for the placeholder
         const placeholderSpan = document.createElement('span');
         placeholderSpan.textContent = placeholderValue;
-        placeholderSpan.className = 'bg-corporate-yellow/20 border border-corporate-yellow/50 px-1 rounded text-corporate-black font-medium';
+        placeholderSpan.className = 'bg-blue-100 border border-blue-300 px-2 py-1 rounded text-blue-800 font-medium mx-1';
+        placeholderSpan.setAttribute('contenteditable', 'false');
         
         // Insert the placeholder at cursor position
         range.deleteContents();
@@ -55,7 +56,8 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
         // If no selection, append at the end
         const placeholderSpan = document.createElement('span');
         placeholderSpan.textContent = placeholderValue;
-        placeholderSpan.className = 'bg-corporate-yellow/20 border border-corporate-yellow/50 px-1 rounded text-corporate-black font-medium';
+        placeholderSpan.className = 'bg-blue-100 border border-blue-300 px-2 py-1 rounded text-blue-800 font-medium mx-1';
+        placeholderSpan.setAttribute('contenteditable', 'false');
         editorRef.current.appendChild(placeholderSpan);
       }
       
@@ -77,12 +79,12 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
   };
 
   const toolbarButtons = [
-    { command: 'bold', label: 'B', title: 'Bold' },
-    { command: 'italic', label: 'I', title: 'Italic' },
-    { command: 'underline', label: 'U', title: 'Underline' },
+    { command: 'bold', label: 'B', title: 'Podebljano' },
+    { command: 'italic', label: 'I', title: 'Kurziv' },
+    { command: 'underline', label: 'U', title: 'Podvučeno' },
     { command: 'insertUnorderedList', label: '•', title: 'Lista' },
     { command: 'insertOrderedList', label: '1.', title: 'Numerisana lista' },
-    { command: 'justifyLeft', label: '⭤', title: 'Levo' },
+    { command: 'justifyLeft', label: '⭤', title: 'Lijevo' },
     { command: 'justifyCenter', label: '⭢', title: 'Centar' },
     { command: 'justifyRight', label: '⭠', title: 'Desno' }
   ];
@@ -139,9 +141,13 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
         onInput={handleInput}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        className="p-4 min-h-[300px] max-h-[500px] overflow-y-auto focus:outline-none focus:border-corporate-yellow"
-        dangerouslySetInnerHTML={{ __html: content }}
+        className="p-4 min-h-[300px] max-h-[500px] overflow-y-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
+        style={{ wordWrap: 'break-word' }}
       />
+      
+      <div className="px-4 py-2 bg-gray-50 border-t text-xs text-gray-600">
+        Prevucite placeholdere iz lijeve strane u editor da biste ih dodali
+      </div>
     </div>
   );
 }
