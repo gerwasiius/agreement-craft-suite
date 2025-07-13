@@ -1,14 +1,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SectionCondition } from "@/types/template";
-import { Plus, X } from "lucide-react";
-import { PlaceholderPicker } from "./PlaceholderPicker";
-import { Placeholder } from "@/types/placeholder";
+import { Plus } from "lucide-react";
+import { ConditionBuilder } from "./ConditionBuilder";
 
 interface SectionConditionsProps {
   conditions: SectionCondition[];
@@ -16,160 +11,63 @@ interface SectionConditionsProps {
 }
 
 export function SectionConditions({ conditions, onChange }: SectionConditionsProps) {
-  const [newCondition, setNewCondition] = useState<Partial<SectionCondition>>({
-    type: 'always_visible',
-    description: ''
-  });
-
-  const conditionTypes = [
-    { value: 'always_visible', label: 'Uvijek vidljiva' },
-    { value: 'always_hidden', label: 'Uvijek skrivena' },
-    { value: 'variable_equals', label: 'Varijabla jednaka vrijednosti' },
-    { value: 'variable_not_equals', label: 'Varijabla različita od vrijednosti' },
-    { value: 'variable_contains', label: 'Varijabla sadrži vrijednost' }
-  ];
-
   const addCondition = () => {
-    if (!newCondition.type || !newCondition.description) return;
-
-    const condition: SectionCondition = {
+    const newCondition: SectionCondition = {
       id: Date.now().toString(),
-      type: newCondition.type as SectionCondition['type'],
-      variableName: newCondition.variableName || '',
-      expectedValue: newCondition.expectedValue || '',
-      description: newCondition.description
+      type: 'always_visible',
+      description: `Uslov ${conditions.length + 1}`
     };
 
-    onChange([...conditions, condition]);
-    setNewCondition({
-      type: 'always_visible',
-      description: ''
-    });
+    onChange([...conditions, newCondition]);
   };
 
-  const removeCondition = (conditionId: string) => {
-    onChange(conditions.filter(c => c.id !== conditionId));
+  const updateCondition = (index: number, updatedCondition: SectionCondition) => {
+    const updatedConditions = [...conditions];
+    updatedConditions[index] = updatedCondition;
+    onChange(updatedConditions);
   };
 
-  const needsVariable = (type: string) => {
-    return ['variable_equals', 'variable_not_equals', 'variable_contains'].includes(type);
-  };
-
-  const handlePlaceholderSelect = (placeholder: Placeholder) => {
-    setNewCondition(prev => ({ 
-      ...prev, 
-      variableName: placeholder.value.replace(/[{}]/g, ''), // Uklanja {{ i }}
-      description: prev.description || `Uslov za ${placeholder.displayName}`
-    }));
+  const removeCondition = (index: number) => {
+    onChange(conditions.filter((_, i) => i !== index));
   };
 
   return (
     <div className="space-y-4">
-      <div className="space-y-3">
+      <div className="flex items-center justify-between">
         <h4 className="font-medium text-corporate-black">Uslovi vidljivosti</h4>
-        
-        {conditions.length > 0 && (
-          <div className="space-y-2">
-            {conditions.map((condition) => (
-              <div key={condition.id} className="flex items-center justify-between p-3 bg-corporate-gray-light rounded-md">
-                <div className="flex-1">
-                  <span className="font-medium text-sm">{condition.description}</span>
-                  <div className="text-xs text-corporate-gray-medium mt-1">
-                    {condition.type === 'always_visible' && 'Uvijek vidljiva'}
-                    {condition.type === 'always_hidden' && 'Uvijek skrivena'}
-                    {condition.type === 'variable_equals' && `${condition.variableName} = "${condition.expectedValue}"`}
-                    {condition.type === 'variable_not_equals' && `${condition.variableName} ≠ "${condition.expectedValue}"`}
-                    {condition.type === 'variable_contains' && `${condition.variableName} sadrži "${condition.expectedValue}"`}
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => removeCondition(condition.id)}
-                  className="h-7 w-7 p-0 text-corporate-red-medium"
-                >
-                  <X size={14} />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Dodaj novi uslov</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-xs">Tip uslova</Label>
-                <Select
-                  value={newCondition.type}
-                  onValueChange={(value) => setNewCondition(prev => ({ ...prev, type: value as SectionCondition['type'] }))}
-                >
-                  <SelectTrigger className="h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {conditionTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-1">
-                <Label className="text-xs">Opis uslova</Label>
-                <Input
-                  value={newCondition.description}
-                  onChange={(e) => setNewCondition(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Kratki opis..."
-                  className="h-8 text-sm"
-                />
-              </div>
-            </div>
-
-            {needsVariable(newCondition.type || '') && (
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <Label className="text-xs">Placeholder</Label>
-                  <PlaceholderPicker
-                    selectedValue={newCondition.variableName ? `{{${newCondition.variableName}}}` : undefined}
-                    onSelect={handlePlaceholderSelect}
-                    trigger={
-                      <Button variant="outline" className="w-full h-8 justify-start text-xs">
-                        {newCondition.variableName ? `{{${newCondition.variableName}}}` : "Odaberite placeholder..."}
-                      </Button>
-                    }
-                  />
-                </div>
-                
-                <div className="space-y-1">
-                  <Label className="text-xs">Očekivana vrijednost</Label>
-                  <Input
-                    value={newCondition.expectedValue || ''}
-                    onChange={(e) => setNewCondition(prev => ({ ...prev, expectedValue: e.target.value }))}
-                    placeholder="Vrijednost..."
-                    className="h-8 text-sm"
-                  />
-                </div>
-              </div>
-            )}
-
-            <Button
-              size="sm"
-              onClick={addCondition}
-              disabled={!newCondition.description || (needsVariable(newCondition.type || '') && (!newCondition.variableName || !newCondition.expectedValue))}
-              className="corporate-button-primary h-8"
-            >
-              <Plus size={14} className="mr-1" />
-              Dodaj uslov
-            </Button>
-          </CardContent>
-        </Card>
+        <Button
+          size="sm"
+          onClick={addCondition}
+          className="corporate-button-primary h-8"
+        >
+          <Plus size={14} className="mr-1" />
+          Dodaj uslov
+        </Button>
       </div>
+      
+      {conditions.length === 0 ? (
+        <div className="text-center py-8 text-corporate-gray-medium">
+          <p>Nema definisanih uslova</p>
+          <p className="text-xs mt-1">Sekcija će biti uvijek vidljiva</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {conditions.map((condition, index) => (
+            <div key={condition.id}>
+              {index > 0 && (
+                <div className="text-center text-sm text-corporate-gray-medium py-2">
+                  I (AND)
+                </div>
+              )}
+              <ConditionBuilder
+                condition={condition}
+                onChange={(updatedCondition) => updateCondition(index, updatedCondition)}
+                onRemove={() => removeCondition(index)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

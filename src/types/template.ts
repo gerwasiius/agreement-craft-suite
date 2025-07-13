@@ -16,10 +16,12 @@ export interface TemplateSection {
 
 export interface SectionCondition {
   id: string;
-  type: 'variable_equals' | 'variable_not_equals' | 'variable_contains' | 'always_visible' | 'always_hidden';
+  type: 'variable_equals' | 'variable_not_equals' | 'variable_contains' | 'always_visible' | 'always_hidden' | 'group';
   variableName?: string;
   expectedValue?: string;
   description: string;
+  operator?: 'AND' | 'OR';
+  children?: SectionCondition[];
 }
 
 export interface Section {
